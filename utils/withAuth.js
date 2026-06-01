@@ -11,7 +11,7 @@ import { apiError } from "./apiError";
 // find user
 // populate user to req
 
-export function withAuth(handler,allowedRole){
+export function withAuth(handler,allowedRoles){
     return async(req, res)=>{
         try {
             await dbConnect();
@@ -33,7 +33,7 @@ export function withAuth(handler,allowedRole){
              }
 
              req.user=user;
-             if(allowedRole && user.role !== allowedRole){
+             if(allowedRoles && !allowedRoles.includes(user.role)){
                 return NextResponse.json(new apiResponse(401,null,"unauthorized"),{status:401});
              }  
              return await handler(req,res);
