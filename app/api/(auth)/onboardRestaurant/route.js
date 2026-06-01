@@ -36,12 +36,15 @@ try {
 
     const trialExpiry=new Date();
     trialExpiry.setDate(trialExpiry.getDate()+14);
+    const graceDuration = 24 * 60 * 60 * 1000;
+    const graceExpiresAt = new Date(trialExpiry.getTime() + graceDuration);
 
     const restaurant= await Restaurant.create({
         name:restaurantName,
         phone:restaurantPhone,
         upiId:restaurantUpiId,
         plan:"trial",
+        graceExpiresAt:graceExpiresAt,
         planExpiresAt:trialExpiry,
     });
 

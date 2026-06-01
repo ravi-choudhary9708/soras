@@ -1,3 +1,4 @@
+import dbConnect from "@/libs/dbConnect";
 import { User } from "@/models/user.model";
 import { apiError } from "@/utils/apiError";
 import { apiResponse } from "@/utils/apiResponse";
@@ -6,8 +7,10 @@ import { generateAccessAndRefreshToken } from "@/utils/generateAccessAndRefreshT
 import { NextResponse } from "next/server";
 
 
+
 export async function POST(req){
   try {
+    await dbConnect()
       const {email, username, password}=await req.json();
     if(!(email || username)){
             return NextResponse.json(new apiError(401,"username or email is required"))
@@ -46,7 +49,10 @@ export async function POST(req){
             path: "/"
     }
 
-    const response=  NextResponse.json(new apiResponse(201,{user:loggedInUser},"user logged in"),{status:201});
+    const response = NextResponse.json(
+    new apiResponse(201, { user: loggedInUser }, "user logged in"), 
+    { status: 201 }
+);
       
     // Bake both tokens directly into the browser cookie storage vault at login time
         response.cookies.set("accessToken", accessToken, { ...cookiesOptions, maxAge: 15 * 60 }); // 15 mins
@@ -54,6 +60,7 @@ export async function POST(req){
 
         return response;
   } catch (error) {
+    console.log("login error", error);
     return NextResponse.json(new apiError(500, "Login processing crashed"), { status: 500 });
     
   }

@@ -24,10 +24,17 @@ const paymentSchema = new mongoose.Schema(
             type: Date,
             required: true // The month/year this payment is covering (e.g., June 2026)
         },
+        note: {
+            type: String,
+            trim: true
+        },
         status: {
             type: String,
             enum: ["pending", "approved", "rejected"],
             default: "pending"
+        },
+        verifiedAt: {
+            type: Date
         },
         rejectionReason: {
             type: String,
@@ -36,5 +43,6 @@ const paymentSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+paymentSchema.plugin(mongoosePaginate);
 
 export const Payment = mongoose.models.Payment || mongoose.model("Payment", paymentSchema);

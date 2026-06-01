@@ -2,6 +2,7 @@ import { User } from "@/models/user.model"
 
 
 export const generateAccessAndRefreshToken= async (userId)=>{
+    
     const user= await User.findById(userId);
 
     const accessToken = user.generateAccessToken();

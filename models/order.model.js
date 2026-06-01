@@ -56,7 +56,7 @@ const orderSchema=new mongoose.Schema({
   }
 },{timestamps:true})
 
-orderSchema.pre("save", async function(next){
+orderSchema.pre("save", async function(){
     const order=this;
     try {
         let calculatedTotal=0;
@@ -73,8 +73,9 @@ orderSchema.pre("save", async function(next){
             }
             calculatedTotal+=item.price *item.quantity;
         }
+        order.total_amount=calculatedTotal;
     } catch (error) {
-        next(error);
+        throw new apiError(500,"Error calculating order total: "+error.message);
     }
 })
 

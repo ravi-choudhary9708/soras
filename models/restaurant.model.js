@@ -29,6 +29,11 @@ const restaurantSchema= new mongoose.Schema({
      enum: ["trial","monthly"],
       default: "trial"
      },
+     isAccountActive: {
+        type: Boolean,
+        default: true
+     },
+     graceExpiresAt: { type: Date },
      planExpiresAt: { type: Date }
 
 }, { timestamps: true })

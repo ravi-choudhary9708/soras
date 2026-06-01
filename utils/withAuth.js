@@ -16,14 +16,17 @@ export function withAuth(handler,allowedRole){
         try {
             await dbConnect();
 
-            const token= req.cookies?.get("accessToken")?.value || req.headers.get("Authorization").replace("Bearer ","");
+            const token= req.cookies?.get("accessToken")?.value || req.headers.get("Authorization")?.replace("Bearer ","");
+           
              if(!token){
                 return NextResponse.json(new apiResponse(401,null,"Authentication token missed"),{status:401});
              }
 
              const decodedToken= await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
+             
 
              const user= await User.findById(decodedToken?._id).select("-password -refreshToken");
+            
              if(!user){
                  return NextResponse.json(new apiResponse(401,null,"invalid session user"),{status:401});
 
