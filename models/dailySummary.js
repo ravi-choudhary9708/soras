@@ -56,8 +56,8 @@ const dailySummarySchema=new mongoose.Schema({
     
 },{timestamps:true})
 
-dailySummarySchema.index({ restaurant_id: 1, date: -1 }); 
+dailySummarySchema.index({ restaurantId: 1, date: -1 }); 
 
 export const DailySummary= 
-mongoose.model.DailySummary || 
+mongoose.models.DailySummary || 
 mongoose.model("DailySummary",dailySummarySchema);

@@ -12,6 +12,11 @@ const menuItemSchema=new mongoose.Schema({
          trim:true,
          index:true
     },
+    description:{
+        type:String,
+        lowercase:true,
+        trim:true,
+    },
     price:{
         type:Number,
          required:true,
@@ -19,6 +24,7 @@ const menuItemSchema=new mongoose.Schema({
     category:{
          type:String,
          lowercase:true,
+         required:true,
          trim:true,
          index:true
     },
@@ -26,10 +32,11 @@ const menuItemSchema=new mongoose.Schema({
         type:Boolean,
     },
     isAvailable:{
-        type:Boolean
+        type:Boolean,
+        default:true
     }
 })
 
 export const MenuItem= 
-mongoose.model.MenuItem || 
+mongoose.models.MenuItem || 
 mongoose.model("MenuItem",menuItemSchema);

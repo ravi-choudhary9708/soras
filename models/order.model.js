@@ -21,6 +21,12 @@ const orderSchema=new mongoose.Schema({
         default: null,
         index: true 
     },
+    isVerifiedBy:{
+        type:Schema.Types.ObjectId,
+        ref:'User',
+        default:null,
+        index:true
+    },
     items:{
         type:[OrderItem],
         required:true,
@@ -33,18 +39,23 @@ const orderSchema=new mongoose.Schema({
             }
         ]
     },
-   status:{
+   PaymentStatus:{
     type: String,
     enum:["open","billed","paid"],
     default:"open",
     index:true
    },
+   isVerified:{
+    type:Boolean,
+    default:false,
+     index:true
+   },
    paymentMode:{
     type: String,
-    enum:["cash","upi","null"],
-    default:"null"
+    enum:["cash","upi"],
+    default:"cash"
    },
-   total_amount: {
+   totalAmount: {
     type: Number,
     required: true,
     default: 0,
@@ -55,11 +66,11 @@ const orderSchema=new mongoose.Schema({
     default: false,
     index: true // Highly helpful for scanning pending synchronization queues fast
   },
-
-  closed_at: {
-    type: Date,
-    default: null
-  }
+orderStatus:{
+    enum:["preparing","ready","served","pending","cancelled"],
+    default:"pending",
+     index:true
+}
 },{timestamps:true})
 
 orderSchema.pre("save", async function(){
@@ -79,12 +90,12 @@ orderSchema.pre("save", async function(){
             }
             calculatedTotal+=item.price *item.quantity;
         }
-        order.total_amount=calculatedTotal;
+        order.totalAmount=calculatedTotal;
     } catch (error) {
         throw new apiError(500,"Error calculating order total: "+error.message);
     }
 })
 
 export const Order= 
-mongoose.model.Order || 
+mongoose.models.Order || 
 mongoose.model("Order",orderSchema);

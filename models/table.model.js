@@ -5,14 +5,30 @@ const tableSchema=new mongoose.Schema({
         type:Schema.Types.ObjectId,
         ref:'Restaurant'
     },
-    tableNo:{
+    tableNumber:{
         type:Number,
         required:true,
     },
-    qrToken:{
+    room:{
+        type:String,
+       default:"main"
+    },
+    masterQrCode:{
          type:String,
          required:true,
          index:true
+    },
+    qrCodeUrl:{
+        type:String,
+        required:true
+    },
+    sessionToken:{
+        type:String,
+        default:null
+    },
+    sessionExpiresAt:{
+        type:Date,
+        default:null
     },
     status:{
         type:String,
@@ -23,5 +39,5 @@ const tableSchema=new mongoose.Schema({
 })
 
 export const Table= 
-mongoose.model.Table || 
+mongoose.models.Table || 
 mongoose.model("Table",tableSchema);
