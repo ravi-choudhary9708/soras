@@ -2,6 +2,7 @@ import dbConnect from "@/libs/dbConnect";
 import { Order } from "@/models/order.model";
 import { apiError } from "@/utils/apiError";
 import { apiResponse } from "@/utils/apiResponse";
+import { withAuth } from "@/utils/withAuth";
 import { NextResponse } from "next/server";
 
 
@@ -13,13 +14,13 @@ async function getPendingOrder(req){
         return NextResponse.json(new apiError(401,"restaurantId is required"))
     }
 
-    const pendingOrder= await Order.find({
+    const pendingOrders= await Order.find({
         restaurantId,
         isVerified:false,
         orderStatus:"pending",
     }).sort({createdAt:1});
 
-    if(!pendingOrder){
+    if(!pendingOrders){
         return NextResponse.json(new apiError(401,"no pending order"))
     }
 
@@ -34,9 +35,11 @@ async function getPendingOrder(req){
             };
         });
 
-    return NextResponse.json(new apiResponse(201,pendingOrder,"fetched order successfully"));
+    return NextResponse.json(new apiResponse(201,operationalTray,"fetched order successfully"),{status:200});
    } catch (error) {
     console.log("error during getting order:",error.message);
     return NextResponse.json(new apiError(501,error.message||"intenal server error"))
    }
 }
+
+export const GET= withAuth(getPendingOrder,["chef","manager"])

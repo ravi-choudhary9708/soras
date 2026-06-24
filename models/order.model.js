@@ -67,7 +67,7 @@ const orderSchema=new mongoose.Schema({
     index: true // Highly helpful for scanning pending synchronization queues fast
   },
 orderStatus:{
-    enum:["preparing","ready","served","pending","cancelled"],
+    enum:["preparing","ready","served","completed","pending","cancelled"],
     default:"pending",
      index:true
 }

@@ -42,7 +42,7 @@ const userSchema= new mongoose.Schema({
    },
    role:{
     type:String,
-    enum:["manager","staff"],
+    enum:["manager","staff","chef"],
     default:"staff",
    },
    refreshToken:{

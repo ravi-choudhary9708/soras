@@ -39,7 +39,7 @@ const dailySummarySchema=new mongoose.Schema({
          default:0,
          min:[0,"cash cant be negative"]
     },
-    toatlUpi:{
+    totalUpi:{
          type:Number,
           default:0,
          min:[0,"upi cant be negative"]
