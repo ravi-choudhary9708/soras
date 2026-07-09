@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { MenuItem } from "./menuItem.model";
 import { apiError } from "@/utils/apiError";
+import {orderItem} from "./orderItem.model";
 
 
 
@@ -61,12 +62,8 @@ const orderSchema=new mongoose.Schema({
     default: 0,
     min: [0, 'Total amount cannot be negative']
   },
-    synced: {
-    type: Boolean,
-    default: false,
-    index: true // Highly helpful for scanning pending synchronization queues fast
-  },
 orderStatus:{
+    type: String,
     enum:["preparing","ready","served","completed","pending","cancelled"],
     default:"pending",
      index:true

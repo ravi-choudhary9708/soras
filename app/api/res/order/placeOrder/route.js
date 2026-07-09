@@ -70,7 +70,6 @@ try {
         items:processedItems,
         customerId:!isStaffUser?authenticatedUserId:null,
         isVerifiedBy:isStaffUser?authenticatedUserId:null,
-        isVerifiedBy:isStaffUser,
         orderStatus:isStaffUser?"preparing":"pending",
         PaymentStatus:"open",
         synced:false

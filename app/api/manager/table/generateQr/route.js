@@ -3,7 +3,7 @@ import { apiError } from "@/utils/apiError";
 import { NextResponse } from "next/server";
 import Table from "@/models/table.model";
 import QRCode from "qrcode";
-import crypto from "crypto-js";
+import crypto from "crypto";
 
 
 async function genereateTableQr(req){
@@ -13,7 +13,7 @@ async function genereateTableQr(req){
     const {restaurantId}= req.user;
     // get table no and room
 
-   const {tableNumber, room}= req.json();   
+   const {tableNumber, room}= await req.json();   
     //validate 
     if(!tableNumber){
         return NextResponse.json(new apiError(400,"table number is required"))

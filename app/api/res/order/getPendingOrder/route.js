@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
 async function getPendingOrder(req){
    try {
      await dbConnect();
-    const {restaurantId}=req.json();
+    const {restaurantId}= await req.json();
     if(!restaurantId){
         return NextResponse.json(new apiError(401,"restaurantId is required"))
     }

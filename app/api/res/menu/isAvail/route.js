@@ -16,7 +16,7 @@ async function toggleMenuItemAvailability(req){
             return NextResponse.json(new apiError(400,"menuItemId and isAvailable are required"));
         }
         // find menu item and update availability and make sure the menu item belongs to the restaurant of the user
-        const {restaurantId}= req.user.restaurantId;
+        const {restaurantId}= req.user;
         const updatedMenuItem= await MenuItem.findOneAndUpdate({
             _id: menuItemId,
             restaurantId: restaurantId

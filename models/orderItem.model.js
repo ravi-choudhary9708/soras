@@ -32,5 +32,5 @@ const orderItemSchema=new mongoose.Schema({
 },{timestamps:true})
 
 export const OrderItem= 
-mongoose.models.Order || 
+mongoose.models.OrderItem || 
 mongoose.model("OrderItem",orderItemSchema);

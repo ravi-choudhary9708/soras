@@ -4,14 +4,13 @@ import { Table } from "@/models/table.model";
 import { apiError } from "@/utils/apiError";
 import { apiResponse } from "@/utils/apiResponse";
 import { withAuth } from "@/utils/withAuth";
-import { NewspaperIcon } from "lucide-react";
 import { NextResponse } from "next/server";
 
 
 async function paymentAndClearTable(req){
    try {
      await dbConnect()
-    const {orderId,tableId,paymentMode}= req.json();
+    const {orderId,tableId,paymentMode}=await req.json();
     if(!orderId || !tableId){
         return NextResponse.json(new apiError(400,"orderId and TableId is requires"));
     }
@@ -20,7 +19,7 @@ async function paymentAndClearTable(req){
         {_id:orderId,restaurantId:req.user.restaurantId},
         {
             $set:{
-                PaymentStatus:paid,
+                PaymentStatus:"paid",
                 paymentMode:paymentMode||"cash",
                 orderStatus:"served"
             }

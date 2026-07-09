@@ -2,6 +2,7 @@ import dbConnect from "@/libs/dbConnect";
 import { Order } from "@/models/order.model";
 import { apiError } from "@/utils/apiError";
 import { apiResponse } from "@/utils/apiResponse";
+import { withAuth } from "@/utils/withAuth";
 import { NextResponse } from "next/server";
 
 
@@ -28,3 +29,5 @@ async function getKitchenOrderHandler(req){
      return NextResponse.json(new apiError(400,error.message||"order not found"));
   }
 }
+
+export const GET=withAuth(getKitchenOrderHandler,["chef","manager"]);
