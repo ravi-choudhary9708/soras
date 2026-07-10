@@ -2,8 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt"; // Make sure to use the hashing library used in your User model
 import dotenv from "dotenv";
 import path from "path";
-import dns from 'dns';
-dns.setServers(['8.8.8.8', '8.8.4.4']);
+
 
 // Load environment variables from your local variables file
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
