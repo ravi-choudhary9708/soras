@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { LayoutDashboard, IndianRupee, Users, CreditCard } from "lucide-react";
-import Sales from "../components/Sales/page";
-import TablesFloor from "../components/TablesFloor";
-import Staff from "../components/Staff";
-import SorasPayment from "../components/SorasPayment/page";
+import { LayoutDashboard, IndianRupee, Users, CreditCard, QrCode } from "lucide-react";
+import TablesFloor from "./components/TablesFloor/page";
+import Sales from "./components/Sales/page";
+import Staff from "./components/Staff/page";
+import SorasPayment from "./components/SorasPayment/page";
+import QrGenerator from "./components/QrGenerator/page";
 
 export default function ManagerDashboard() {
   const [activeTab, setActiveTab] = useState("tables"); // Default view
@@ -21,36 +22,39 @@ export default function ManagerDashboard() {
         <nav className="flex-1 p-4 space-y-1.5 mt-4">
           <button
             onClick={() => setActiveTab("tables")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${
-              activeTab === "tables" ? "bg-purple-600 text-white shadow-md shadow-purple-900/20" : "hover:bg-slate-800/60 text-slate-400 hover:text-slate-200"
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${activeTab === "tables" ? "bg-purple-600 text-white shadow-md shadow-purple-900/20" : "hover:bg-slate-800/60 text-slate-400 hover:text-slate-200"
+              }`}
           >
             <LayoutDashboard size={18} /> Live Floor Layout
           </button>
 
           <button
+            onClick={() => setActiveTab("qr-generation")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${activeTab === "qr-generation" ? "bg-purple-600 text-white shadow-md" : "text-slate-400 hover:bg-slate-800/60"}`}
+          >
+            <QrCode size={18} /> QR Generation
+          </button>
+
+          <button
             onClick={() => setActiveTab("sales")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${
-              activeTab === "sales" ? "bg-purple-600 text-white shadow-md shadow-purple-900/20" : "hover:bg-slate-800/60 text-slate-400 hover:text-slate-200"
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${activeTab === "sales" ? "bg-purple-600 text-white shadow-md shadow-purple-900/20" : "hover:bg-slate-800/60 text-slate-400 hover:text-slate-200"
+              }`}
           >
             <IndianRupee size={18} /> Sales & Analytics
           </button>
 
           <button
             onClick={() => setActiveTab("staff")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${
-              activeTab === "staff" ? "bg-purple-600 text-white shadow-md shadow-purple-900/20" : "hover:bg-slate-800/60 text-slate-400 hover:text-slate-200"
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${activeTab === "staff" ? "bg-purple-600 text-white shadow-md shadow-purple-900/20" : "hover:bg-slate-800/60 text-slate-400 hover:text-slate-200"
+              }`}
           >
             <Users size={18} /> Staff Registration
           </button>
 
           <button
             onClick={() => setActiveTab("billing")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${
-              activeTab === "billing" ? "bg-purple-600 text-white shadow-md shadow-purple-900/20" : "hover:bg-slate-800/60 text-slate-400 hover:text-slate-200"
-            }`}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${activeTab === "billing" ? "bg-purple-600 text-white shadow-md shadow-purple-900/20" : "hover:bg-slate-800/60 text-slate-400 hover:text-slate-200"
+              }`}
           >
             <CreditCard size={18} /> Soras Subscription
           </button>
@@ -69,6 +73,7 @@ export default function ManagerDashboard() {
         {activeTab === "sales" && <Sales />}
         {activeTab === "staff" && <Staff />}
         {activeTab === "billing" && <SorasPayment />}
+        {activeTab === "qr-generation" && <QrGenerator />}
       </main>
     </div>
   );
