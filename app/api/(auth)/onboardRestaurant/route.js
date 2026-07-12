@@ -60,6 +60,8 @@ try {
     });
 
     const createdManager= await User.findById(manager._id).select("-password -refreshToken");
+
+    console.log("created manager:",createdManager);
     const createdRestaurant= await Restaurant.findById(restaurant._id);
     
     if(!createdRestaurant || !createdManager){
@@ -69,7 +71,7 @@ try {
 
 
 
-    return NextResponse.json(new apiResponse(201,{user:manager, restaurant:restaurant},"restaurant created successfully"),{status:201});
+    return NextResponse.json(new apiResponse(201,{user:createdManager, restaurant:createdRestaurant},"restaurant created successfully"),{status:201});
 }catch (error) {
     console.log("onboarding error", error);
     return NextResponse.json(new apiError(500,error.message || "internal server error"));

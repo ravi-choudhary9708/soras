@@ -6,17 +6,22 @@ import { withAuth } from "@/utils/withAuth";
 import { apiError } from "@/utils/apiError";
 import { v2 as cloudinary } from "cloudinary";
 
+
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,  
+    api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-async function getUploadSignature(req){
+async function getUploadSignature(req) {
     try {
-        const timestamp= Math.round(Date.now()/1000);
-        const folderName= `soras/payments/${req.user.restaurantId}`;
-        const signature= cloudinary.utils.api_sign_request({timestamp, folder: folderName}, process.env.CLOUDINARY_API_SECRET);
+
+        const { type } = await req.json().catch(() => ({ type: "menu" }));
+        const uploadType = type || req.user.name;
+
+        const timestamp = Math.round(Date.now() / 1000);
+        const folderName = `soras/${uploadType}/${req.user.restaurantId}`;
+        const signature = cloudinary.utils.api_sign_request({ timestamp, folder: folderName }, process.env.CLOUDINARY_API_SECRET);
         return NextResponse.json({
             timestamp,
             folderName,
@@ -26,10 +31,9 @@ async function getUploadSignature(req){
         });
     } catch (error) {
         console.error("Error generating upload signature:", error);
-        return NextResponse.json(new apiError(500, "Failed to generate upload signature")); 
+        return NextResponse.json(new apiError(500, "Failed to generate upload signature"));
     }
 }
 
-export const POST= withAuth(getUploadSignature, "manager");
-    
-       
+export const POST = withAuth(getUploadSignature, "manager");
+

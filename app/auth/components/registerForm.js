@@ -32,6 +32,7 @@ export default function RegisterForm({ onSubmit }) {
     setRole(selectedRole);
     setApiResponse({ type: '', message: '' }); // Clear notice on switch
     setFormData({
+      name:'',
       email: '',
       phone: '',
       password: '',

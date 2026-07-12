@@ -1,11 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import { LayoutDashboard, IndianRupee, Users, CreditCard, QrCode } from "lucide-react";
+import { LayoutDashboard, IndianRupee, Users, CreditCard, QrCode, Utensils } from "lucide-react";
 import TablesFloor from "./components/TablesFloor/page";
 import Sales from "./components/Sales/page";
 import Staff from "./components/Staff/page";
 import SorasPayment from "./components/SorasPayment/page";
 import QrGenerator from "./components/QrGenerator/page";
+import AddMenu from "./components/AddMenu/page";
 
 export default function ManagerDashboard() {
   const [activeTab, setActiveTab] = useState("tables"); // Default view
@@ -33,6 +34,13 @@ export default function ManagerDashboard() {
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${activeTab === "qr-generation" ? "bg-purple-600 text-white shadow-md" : "text-slate-400 hover:bg-slate-800/60"}`}
           >
             <QrCode size={18} /> QR Generation
+          </button>
+
+          <button
+            onClick={() => setActiveTab("add-menu")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${activeTab === "add-menu" ? "bg-purple-600 text-white shadow-md shadow-purple-900/20" : "text-slate-400 hover:bg-slate-800/60"}`}
+          >
+            <Utensils size={18} /> Add Menu Item
           </button>
 
           <button
@@ -70,6 +78,7 @@ export default function ManagerDashboard() {
       {/* 🖥️ Right Content Display Area */}
       <main className="flex-1 ml-64 p-8 min-h-screen">
         {activeTab === "tables" && <TablesFloor />}
+        {activeTab === "add-menu" && <AddMenu />}
         {activeTab === "sales" && <Sales />}
         {activeTab === "staff" && <Staff />}
         {activeTab === "billing" && <SorasPayment />}

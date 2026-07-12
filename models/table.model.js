@@ -22,6 +22,11 @@ const tableSchema=new mongoose.Schema({
         type:String,
         required:true
     },
+    qrPublicId:{
+         type:String,
+        required:true,
+    },
+    
     sessionToken:{
         type:String,
         default:null

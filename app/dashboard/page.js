@@ -1,3 +1,4 @@
+"use client"
 import { useEffect, useState, useRef } from "react";
 
 export default function TerminalDashboard({ userRole }) { // userRole passed from Auth Context ("staff" or "manager")
