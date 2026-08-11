@@ -27,7 +27,7 @@ async function settleTableHandler(req,{params}){
         { new: true }
     );
     if(!tableLock){
-        return NextResponse.json(new apiError(400,"this table is free or session token not found"),{status:404});
+        return NextResponse.json(new apiError(404,"this table is free or session token not found"),{status:404});
     };
 
    const session= await mongoose.startSession();

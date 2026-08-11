@@ -17,7 +17,7 @@ async function makeOrderReadyHandler(req,{params}){
     };
 
     const readyOrder= await Order.findOneAndUpdate(
-        {_id:orderId,restaurantId,orderStatus:"preparng"},
+        {_id:orderId,restaurantId,orderStatus:"preparing"},
         {$set:{orderStatus:"ready"}},
         {new:true}
     );

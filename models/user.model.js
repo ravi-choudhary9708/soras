@@ -7,7 +7,7 @@ const userSchema= new mongoose.Schema({
     restaurantId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Restaurant",
-    required: true // Every user must belong to a restaurant tenant
+    default: null // null for platform admin; required for all restaurant users
 },
     username:{
     type:String,
@@ -42,7 +42,7 @@ const userSchema= new mongoose.Schema({
    },
    role:{
     type:String,
-    enum:["manager","staff","chef"],
+    enum:["manager","staff","chef","admin"],
     default:"staff",
    },
    refreshToken:{

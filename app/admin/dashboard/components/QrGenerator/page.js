@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { QrCode, Download, Printer, RefreshCw, Layers } from "lucide-react";
+import { fetchWithAuth } from "@/utils/fetchWithAuth";
 
 export default function QrGenerator() {
   const [tableNumber, setTableNumber] = useState("");
@@ -16,7 +17,7 @@ export default function QrGenerator() {
     setIsLoading(true);
     try {
       // 📡 Dispatched payload matching your backend: { tableNumber, room }
-      const response = await fetch("/api/manager/table/generateQr", {
+      const response = await fetchWithAuth("/api/manager/table/generateQr", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

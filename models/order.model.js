@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { MenuItem } from "./menuItem.model";
 import { apiError } from "@/utils/apiError";
-import {orderItem} from "./orderItem.model";
+import { orderItemSchema } from "./orderItem.model";
 
 
 
@@ -29,7 +29,7 @@ const orderSchema=new mongoose.Schema({
         index:true
     },
     items:{
-        type:[OrderItem],
+        type:[orderItemSchema],
         required:true,
         validate:[
             {

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 
 export default function LoginForm({ onSubmit }) {
-  const [role, setRole] = useState('user'); // Default to 'user' login endpoint
+  const [role, setRole] = useState('manager'); // Default to manager
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -23,7 +23,7 @@ export default function LoginForm({ onSubmit }) {
     setApiResponse({ type: '', message: '' });
     setIsLoading(true);
 
-    // 1. Assign target path based on user or manager selections
+    // admin and manager both use /api/login (User model); customer uses /api/customerLogin
     const targetEndpoint = role === 'user' 
       ? '/api/customerLogin' 
       : '/api/login';
@@ -48,9 +48,11 @@ export default function LoginForm({ onSubmit }) {
         message: result.message || '🎉 Login verification successful! Welcome back.'
       });
 
-      // 4. Pass execution context up to parent routing parameters
+      // Pass the REAL role from the DB response (not the UI-selected role)
+      // This ensures admin accounts are correctly routed
       if (onSubmit) {
-        onSubmit(result, role);
+        const realRole = result?.data?.user?.role || role;
+        onSubmit(result, realRole);
       }
 
     } catch (error) {
@@ -66,7 +68,7 @@ export default function LoginForm({ onSubmit }) {
       {/* Account Type Selector Toggle */}
       <div className="flex flex-col space-y-1.5">
         <label className="text-xs font-bold text-[#1A1A1A]">Select Account Type</label>
-        <div className="grid grid-cols-2 gap-2 p-1 bg-[#F4F4F6] rounded-xl">
+        <div className="grid grid-cols-3 gap-2 p-1 bg-[#F4F4F6] rounded-xl">
           <button
             type="button"
             disabled={isLoading}
@@ -77,7 +79,7 @@ export default function LoginForm({ onSubmit }) {
                 : 'text-[#626264] hover:text-[#1A1A1A] disabled:opacity-50'
             }`}
           >
-            Standard User
+            Customer
           </button>
           <button
             type="button"
@@ -89,7 +91,19 @@ export default function LoginForm({ onSubmit }) {
                 : 'text-[#626264] hover:text-[#1A1A1A] disabled:opacity-50'
             }`}
           >
-            Restaurant Manager
+            Manager
+          </button>
+          <button
+            type="button"
+            disabled={isLoading}
+            onClick={() => handleRoleChange('admin')}
+            className={`py-2 text-xs font-bold rounded-lg transition-all ${
+              role === 'admin'
+                ? 'bg-white text-[#5D44FF] shadow-sm'
+                : 'text-[#626264] hover:text-[#1A1A1A] disabled:opacity-50'
+            }`}
+          >
+            Soras Admin
           </button>
         </div>
       </div>

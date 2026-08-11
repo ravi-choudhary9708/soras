@@ -25,14 +25,14 @@ async function verifyOrder(req,{params}){
                 $set:{
                     isVerified:true,
                     isVerifiedBy:staffId,
-                    status:"preparing"
+                    orderStatus:"preparing"
                 }
             },
             {new:true}
         );
 
         if(!approvedOrder){
-            return NextResponse.json(new apiError(401,"pending order not found or it is approved by different staff"));
+            return NextResponse.json(new apiError(404,"pending order not found or it is approved by different staff"));
 
         }
 
@@ -43,7 +43,7 @@ async function verifyOrder(req,{params}){
         ),{status:201});
     } catch (error) {
         console.log("error during verification of order:", error);
-        return NextResponse.json(new apiError(401,error.message || " error during verification of order"));
+        return NextResponse.json(new apiError(500,error.message || " error during verification of order"));
 
 
     }

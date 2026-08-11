@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/dbConnect";
+import dbConnect from "@/libs/dbConnect";
 import { Table } from "@/models/table.model";
 import { Order } from "@/models/order.model";
 import crypto from "crypto";
-import { withAuth } from "@/middleware/withAuth";
-import apiResponse from "@/utils/apiResponse";
-import apiError from "@/utils/apiError";
+import { withAuth } from "@/utils/withAuth";
+import { apiResponse } from "@/utils/apiResponse";
+import { apiError } from "@/utils/apiError";
 
 async function staffCreateOrderHandler(req) {
     try {

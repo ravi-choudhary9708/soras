@@ -41,7 +41,7 @@ async function updateProfileHandler(req) {
         ).select("-password -refreshToken");
 
         return NextResponse.json(
-            new apiResponse(200, updatedUser, "Manager credential configuration updated successfully"),
+            new apiResponse(200, updatedUser, "Profile updated successfully"),
             { status: 200 }
         );
 
@@ -51,4 +51,5 @@ async function updateProfileHandler(req) {
     }
 }
 
-export const PUT = withAuth(updateProfileHandler, ["manager"]);
+// Allow both managers and staff to update their own profile
+export const PUT = withAuth(updateProfileHandler, ["manager", "staff"]);

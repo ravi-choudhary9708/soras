@@ -22,17 +22,17 @@ try {
     const currentUser= req.user;
     
     if(currentUser.role!="manager"||!currentUser ){
-        return NextResponse.json(new apiError(401,"unauthorized"));
+        return NextResponse.json(new apiError(401,"unauthorized")); // This is correct, leave as 401
     }
     const {email,username,fullName,password,phone}=await req.json();
 
     if([username,email,phone,fullName,password].some(feild=>!feild || feild.trim()=="")){
-        return NextResponse.json(new apiError(401,"all feild is required"));
+        return NextResponse.json(new apiError(400,"all feild is required"));
     }
     const role="staff";
     const existingUser= await User.findOne({$or:[{username},{email}]});
     if(existingUser){
-        return NextResponse.json(new apiError(401,"user already exists"));
+        return NextResponse.json(new apiError(409,"user already exists"));
     }
     const user= await User.create({
         username,
@@ -55,4 +55,4 @@ try {
 }
 }
 
-export const POST=withAuth(registerStaff ,"manager");
+export const POST = withAuth(registerStaff, ["manager"]);

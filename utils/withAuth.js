@@ -34,7 +34,7 @@ export function withAuth(handler,allowedRoles){
 
              req.user=user;
              if(allowedRoles && !allowedRoles.includes(user.role)){
-                return NextResponse.json(new apiResponse(401,null,"unauthorized"),{status:401});
+                return NextResponse.json(new apiResponse(403,null,"forbidden - insufficient permissions"),{status:403});
              }  
              return await handler(req,res);
 

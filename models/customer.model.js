@@ -71,11 +71,10 @@ customerSchema.methods.generateAccessToken= function(){
             _id:this._id,
             email:this.email,
             role: this.role,
-            restaurantId: this.restaurantId
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
-        expiresIn:"30d"
+        expiresIn:"1d"
         }
     )
 }

@@ -1,39 +1,44 @@
 import dbConnect from "@/libs/dbConnect";
 import { Order } from "@/models/order.model";
+import { Table } from "@/models/table.model";
 import { apiResponse } from "@/utils/apiResponse";
 import { apiError } from "@/utils/apiError";
 import { NextResponse } from "next/server";
 
-
-export async function GET(req){
-   try {
-     await dbConnect();
-    const { searchParams } = new URL(req.url);
+export async function GET(req) {
+    try {
+        await dbConnect();
+        const { searchParams } = new URL(req.url);
         const restaurantId = searchParams.get("restaurantId");
-        const tableNumber = searchParams.get("tableNumber");
+        const tableId = searchParams.get("tableId");
         const sessionToken = searchParams.get("sessionToken");
 
-        if (!restaurantId || !tableNumber || !sessionToken) {
-            return NextResponse.json(new apiError(400, "Missing required session tracking validation keys"), { status: 400 });
+        if (!restaurantId || !tableId) {
+            return NextResponse.json(new apiError(400, "Missing required params: restaurantId and tableId"), { status: 400 });
         }
 
-        // Fetch all orders matching this specific dynamic table session sitting
-        // This includes items cooking (preparing), ready, or already eaten (served)
+        // Validate the session token matches the table
+        if (sessionToken) {
+            const table = await Table.findOne({ _id: tableId, restaurantId });
+            if (!table || table.sessionToken !== sessionToken) {
+                return NextResponse.json(new apiError(401, "Invalid session"), { status: 401 });
+            }
+        }
+
+        // Fetch all orders for this table in this session
         const liveOrders = await Order.find({
             restaurantId,
-            tableNumber,
-            sessionToken,
+            tableId,
             orderStatus: { $in: ["pending", "preparing", "ready", "served"] }
         }).sort({ createdAt: 1 });
 
-        // Calculate running financial totals dynamically
         const currentRunningTotal = liveOrders.reduce((acc, order) => acc + order.totalAmount, 0);
 
         return NextResponse.json(
-            new apiResponse(200, { orders: liveOrders, currentRunningTotal }, "Live running session bill compiled successfully."),
+            new apiResponse(200, { orders: liveOrders, currentRunningTotal }, "Live session bill compiled successfully."),
             { status: 200 }
         );
-   } catch (error) {
-    return NextResponse.json(new apiError(500, error.message), { status: 500 });
-   }
+    } catch (error) {
+        return NextResponse.json(new apiError(500, error.message), { status: 500 });
+    }
 }

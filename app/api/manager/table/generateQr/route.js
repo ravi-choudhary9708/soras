@@ -22,7 +22,7 @@ async function generateTableQr(req) {
     const { restaurantId } = req.user;
    
     if (!restaurantId) {
-      return NextResponse.json(new apiError(400, "please login"))
+      return NextResponse.json(new apiError(403, "no restaurant associated with your account"))
     }
     // get table no and room
 
@@ -55,7 +55,7 @@ async function generateTableQr(req) {
     });
 
     if (!result) {
-      return NextResponse.json(new apiError(401, "cloudinary upload failed"));
+      return NextResponse.json(new apiError(500, "cloudinary upload failed"));
     }
 
     const provisionedTable = await Table.findOneAndUpdate(

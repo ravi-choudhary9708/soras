@@ -6,40 +6,36 @@ import { withAuth } from "@/utils/withAuth";
 import { NextResponse } from "next/server";
 
 
-async function getPendingOrder(req){
-   try {
-     await dbConnect();
-    const {restaurantId}= await req.json();
-    if(!restaurantId){
-        return NextResponse.json(new apiError(401,"restaurantId is required"))
-    }
+async function getPendingOrder(req) {
+    try {
+        await dbConnect();
+        // restaurantId comes from the authenticated user — no need for body parse on GET
+        const restaurantId = req.user.restaurantId;
 
-    const pendingOrders= await Order.find({
-        restaurantId,
-        isVerified:false,
-        orderStatus:"pending",
-    }).sort({createdAt:1});
+        const pendingOrders = await Order.find({
+            restaurantId,
+            isVerified: false,
+            orderStatus: "pending",
+        }).sort({ createdAt: 1 });
 
-    if(!pendingOrders){
-        return NextResponse.json(new apiError(401,"no pending order"))
-    }
-
-    const now= new Date();
-    const operationalTray = pendingOrders.map(order => {
+        const now = new Date();
+        const operationalTray = pendingOrders.map(order => {
             const orderAgeMs = now.getTime() - new Date(order.createdAt).getTime();
             const minutesOld = Math.floor(orderAgeMs / 60000);
-
             return {
                 ...order.toObject(),
                 minutesOld
             };
         });
 
-    return NextResponse.json(new apiResponse(201,operationalTray,"fetched order successfully"),{status:200});
-   } catch (error) {
-    console.log("error during getting order:",error.message);
-    return NextResponse.json(new apiError(501,error.message||"intenal server error"))
-   }
+        return NextResponse.json(
+            new apiResponse(200, operationalTray, "Fetched pending orders successfully"),
+            { status: 200 }
+        );
+    } catch (error) {
+        console.log("error during getting order:", error.message);
+        return NextResponse.json(new apiError(500, error.message || "Internal server error"));
+    }
 }
 
-export const GET= withAuth(getPendingOrder,["chef","manager"])
+export const GET = withAuth(getPendingOrder, ["chef", "manager", "staff"]);

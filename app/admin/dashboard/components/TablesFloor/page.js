@@ -1,146 +1,222 @@
 "use client";
-import React, { useState } from "react";
-import { CheckCircle2, UserCheck, AlertCircle } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { CheckCircle2, UserCheck, AlertCircle, RefreshCw, XCircle, DollarSign, Loader2 } from "lucide-react";
+import { fetchWithAuth } from "@/utils/fetchWithAuth";
 
 export default function TablesFloor() {
-  const [tables, setTables] = useState([
-    { id: "1", tableNumber: "1", status: "free", totalBill: 0, waiter: "-" },
-    { id: "2", tableNumber: "2", status: "occupied", totalBill: 1650, waiter: "Rahul Kumar" },
-    { id: "3", tableNumber: "3", status: "bill_requested", totalBill: 3400, waiter: "Satyam Kumar" },
-    { id: "4", tableNumber: "4", status: "occupied", totalBill: 890, waiter: "Rahul Kumar" },
-  ]);
-
+  const [tables, setTables] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTable, setSelectedTable] = useState(null);
-  
-  // Split Payment Inputs
-  const [cashAmount, setCashAmount] = useState("");
-  const [upiAmount, setUpiAmount] = useState("");
+  const [tableOrders, setTableOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [paymentMode, setPaymentMode] = useState("cash");
+  const [settling, setSettling] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
-  const handleOpenSettleDrawer = (table) => {
+  const fetchTables = useCallback(async () => {
+    try {
+      const res = await fetchWithAuth("/api/manager/table");
+      const data = await res.json();
+      if (data.success) setTables(data.data);
+    } catch (err) {
+      console.error("Error fetching tables:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTables();
+    const interval = setInterval(fetchTables, 15000);
+    return () => clearInterval(interval);
+  }, [fetchTables]);
+
+  const openSettleDrawer = async (table) => {
     setSelectedTable(table);
-    // Auto-fill entire total into UPI field as a baseline suggestion
-    setUpiAmount(table.totalBill.toString());
-    setCashAmount("0");
+    setPaymentMode("cash");
+    setFeedback("");
+    setOrdersLoading(true);
+    try {
+      const res = await fetchWithAuth(`/api/res/order?tableId=${table._id}&status=served`);
+      const data = await res.json();
+      if (data.success) setTableOrders(data.data.orders || []);
+    } catch (err) {
+      console.error("Error fetching table orders:", err);
+    } finally {
+      setOrdersLoading(false);
+    }
   };
 
-  // Dynamic Calculation Logic as manager type numbers
-  const currentCash = parseFloat(cashAmount) || 0;
-  const currentUpi = parseFloat(upiAmount) || 0;
-  const totalPaidCalculated = currentCash + currentUpi;
-  const targetTotal = selectedTable?.totalBill || 0;
-  const paymentMismatch = totalPaidCalculated !== targetTotal;
+  const totalBill = tableOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
-  const handleFinalizeSettlement = (e) => {
-    e.preventDefault();
-    if (paymentMismatch) return alert("❌ Absolute Balance Mismatch! Paid split totals must match grand total bill exact.");
-
-    alert(`💸 Settlement Executed! \nCash Split: ₹${currentCash}\nUPI Split: ₹${currentUpi}\nSyncing transaction logs safely to cloud database structures.`);
-    
-    setTables(tables.map(t => t.id === selectedTable.id ? { ...t, status: "free", totalBill: 0, waiter: "-" } : t));
-    setSelectedTable(null);
+  const handleSettle = async () => {
+    if (!selectedTable || tableOrders.length === 0) return;
+    setSettling(true);
+    try {
+      // Settle each order and clear the table
+      for (const order of tableOrders) {
+        await fetchWithAuth("/api/res/order/payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId: order._id, tableId: selectedTable._id, paymentMode })
+        });
+      }
+      setFeedback("✅ Table settled successfully!");
+      setTimeout(() => {
+        setSelectedTable(null);
+        setTableOrders([]);
+        fetchTables();
+      }, 1200);
+    } catch (err) {
+      setFeedback("❌ Settlement failed. Please try again.");
+    } finally {
+      setSettling(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64 text-slate-400">
+        <Loader2 className="animate-spin mr-2" size={20} /> Loading floor layout...
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-black text-slate-900">Live Dining Floor</h2>
-        <p className="text-xs text-slate-400 mt-0.5">Click dynamic bill-requested cards to initialize split calculations</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-black text-slate-900">Live Dining Floor</h2>
+          <p className="text-xs text-slate-400 mt-0.5">Click occupied tables to view bills and settle</p>
+        </div>
+        <button
+          onClick={fetchTables}
+          className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-700 border rounded-xl px-3 py-2 hover:bg-slate-50 transition"
+        >
+          <RefreshCw size={13} /> Refresh
+        </button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {tables.map((table) => {
-          let stateStyle = "bg-white border-slate-200 text-slate-800 hover:border-slate-300";
-          if (table.status === "occupied") stateStyle = "bg-amber-50/40 border-amber-200 text-amber-900";
-          if (table.status === "bill_requested") stateStyle = "bg-rose-50 border-rose-300 text-rose-900 shadow-md animate-pulse cursor-pointer";
+      {tables.length === 0 ? (
+        <div className="text-center py-16 text-slate-400">
+          <p className="font-bold">No tables found.</p>
+          <p className="text-xs mt-1">Generate QR codes to provision tables.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {tables.map((table) => {
+            const isOccupied = table.status === "occupied";
+            const isFree = table.status === "free";
+            let stateStyle = "bg-white border-slate-200 text-slate-800 hover:border-slate-300";
+            if (isOccupied) stateStyle = "bg-amber-50/40 border-amber-300 text-amber-900 cursor-pointer hover:border-amber-400";
 
-          return (
-            <div
-              key={table.id}
-              onClick={() => table.status !== "free" && handleOpenSettleDrawer(table)}
-              className={`p-5 rounded-2xl border-2 transition-all flex flex-col justify-between h-36 relative ${stateStyle}`}
-            >
-              <div>
-                <div className="flex justify-between items-start">
-                  <span className="text-xs font-bold text-slate-400 tracking-wider">TABLE</span>
-                  {table.status === "bill_requested" && <span className="bg-rose-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full">DUE</span>}
-                </div>
-                <p className="text-3xl font-black mt-1">{table.tableNumber}</p>
-              </div>
-              <div className="flex justify-between items-center text-xs border-t border-dashed border-slate-200/60 pt-2 mt-2">
-                <span className="flex items-center gap-1 text-slate-400"><UserCheck size={12}/> {table.waiter}</span>
-                {table.totalBill > 0 && <span className="font-bold text-slate-900">₹{table.totalBill}</span>}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* 💳 Split-Payment Drawer */}
-      {selectedTable && (
-        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs flex justify-end z-50">
-          <div className="bg-white w-full max-w-md h-full p-6 flex flex-col justify-between shadow-2xl rounded-l-3xl animate-slide-left">
-            <div>
-              <div className="flex justify-between items-center border-b pb-4 mb-6">
+            return (
+              <div
+                key={table._id}
+                onClick={() => isOccupied && openSettleDrawer(table)}
+                className={`p-5 rounded-2xl border-2 transition-all flex flex-col justify-between h-36 relative ${stateStyle}`}
+              >
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">Table {selectedTable.tableNumber} Settlement</h3>
-                  <p className="text-xs text-slate-400">Handle compound checkout matrices below</p>
-                </div>
-                <button onClick={() => setSelectedTable(null)} className="text-slate-400 text-sm font-bold hover:text-slate-600">✕ Close</button>
-              </div>
-
-              {/* Due Card */}
-              <div className="bg-slate-900 text-white p-5 rounded-2xl mb-6 shadow-inner">
-                <span className="text-xs text-slate-400 font-bold block tracking-wider uppercase">Grand Total Invoice Due</span>
-                <span className="text-4xl font-black">₹{targetTotal}</span>
-              </div>
-
-              {/* Inputs Split Forms Container */}
-              <form onSubmit={handleFinalizeSettlement} className="space-y-4">
-                <div>
-                  <label className="text-xs font-bold text-slate-500 block mb-1">Cash Collection Amount (₹)</label>
-                  <input
-                    type="number"
-                    value={cashAmount}
-                    onChange={(e) => setCashAmount(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-hidden focus:border-purple-600"
-                    placeholder="Enter cash component received"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-bold text-slate-500 block mb-1">UPI Electronic Amount (₹)</label>
-                  <input
-                    type="number"
-                    value={upiAmount}
-                    onChange={(e) => setUpiAmount(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-hidden focus:border-purple-600"
-                    placeholder="Enter UPI component received"
-                  />
-                </div>
-
-                {/* Real-time Math Auditing Box */}
-                <div className={`p-4 rounded-xl border flex items-start gap-3 mt-4 ${paymentMismatch ? "bg-rose-50 border-rose-200 text-rose-900" : "bg-emerald-50 border-emerald-200 text-emerald-900"}`}>
-                  {paymentMismatch ? <AlertCircle size={18} className="mt-0.5 text-rose-600"/> : <CheckCircle2 size={18} className="mt-0.5 text-emerald-600"/>}
-                  <div>
-                    <p className="text-xs font-bold">Sum Collected: ₹{totalPaidCalculated}</p>
-                    <p className="text-[11px] opacity-80 mt-0.5">
-                      {paymentMismatch 
-                        ? `Awaiting exact reconciliation. Difference: ₹${targetTotal - totalPaidCalculated}` 
-                        : "Totals align exactly! Safe to commit settlement vector."}
-                    </p>
+                  <div className="flex justify-between items-start">
+                    <span className="text-xs font-bold text-slate-400 tracking-wider">TABLE</span>
+                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${isOccupied ? "bg-amber-500 text-white" : "bg-emerald-100 text-emerald-700"}`}>
+                      {isOccupied ? "OCCUPIED" : "FREE"}
+                    </span>
                   </div>
+                  <p className="text-3xl font-black mt-1">{table.tableNumber}</p>
                 </div>
-              </form>
+                <div className="flex justify-between items-center text-xs border-t border-dashed border-slate-200/60 pt-2 mt-2">
+                  <span className="flex items-center gap-1 text-slate-400">
+                    <UserCheck size={12} /> {table.room || "main"}
+                  </span>
+                  {isOccupied && <span className="text-xs font-bold text-amber-600">Tap to settle</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Settlement Drawer */}
+      {selectedTable && (
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm flex justify-end z-50">
+          <div className="bg-white w-full max-w-md h-full p-6 flex flex-col shadow-2xl rounded-l-3xl">
+            <div className="flex justify-between items-center border-b pb-4 mb-6">
+              <div>
+                <h3 className="text-lg font-black text-slate-900">Table {selectedTable.tableNumber} — Settle Bill</h3>
+                <p className="text-xs text-slate-400">{selectedTable.room}</p>
+              </div>
+              <button onClick={() => setSelectedTable(null)} className="text-slate-400 hover:text-slate-600 transition">
+                <XCircle size={22} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-4">
+              {ordersLoading ? (
+                <div className="flex items-center justify-center h-32 text-slate-400">
+                  <Loader2 className="animate-spin mr-2" size={18} /> Loading orders...
+                </div>
+              ) : tableOrders.length === 0 ? (
+                <div className="text-center text-slate-400 py-8">
+                  <p className="font-semibold text-sm">No served orders found for this table.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="bg-slate-900 text-white p-5 rounded-2xl">
+                    <span className="text-xs text-slate-400 font-bold block tracking-wider uppercase">Grand Total</span>
+                    <span className="text-4xl font-black">₹{totalBill}</span>
+                  </div>
+
+                  <div className="space-y-2">
+                    {tableOrders.map((order) => (
+                      <div key={order._id} className="bg-slate-50 rounded-xl p-3 text-xs">
+                        <div className="flex justify-between font-bold text-slate-700">
+                          <span>{order.items?.length} item(s)</span>
+                          <span>₹{order.totalAmount}</span>
+                        </div>
+                        <div className="mt-1 space-y-0.5 text-slate-400">
+                          {order.items?.map((item, i) => (
+                            <div key={i} className="flex justify-between">
+                              <span>{item.name} × {item.quantity}</span>
+                              <span>₹{item.price * item.quantity}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-500 block mb-2 uppercase tracking-wide">Payment Mode</label>
+                    <div className="flex gap-2">
+                      {["cash", "upi"].map(mode => (
+                        <button
+                          key={mode}
+                          onClick={() => setPaymentMode(mode)}
+                          className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition ${paymentMode === mode ? "bg-purple-600 border-purple-600 text-white" : "bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300"}`}
+                        >
+                          {mode.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {feedback && (
+                <div className={`p-3 rounded-xl text-xs font-semibold text-center ${feedback.startsWith("✅") ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>
+                  {feedback}
+                </div>
+              )}
             </div>
 
             <button
-              disabled={paymentMismatch}
-              onClick={handleFinalizeSettlement}
-              className={`w-full py-3.5 rounded-xl font-bold text-sm transition text-center ${
-                paymentMismatch ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-600/10"
-              }`}
+              disabled={settling || tableOrders.length === 0 || ordersLoading}
+              onClick={handleSettle}
+              className="mt-4 w-full py-3.5 rounded-xl font-bold text-sm transition text-center flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-200 disabled:text-slate-400 text-white shadow-md shadow-purple-600/10"
             >
-              Complete Account Settlement
+              {settling ? <Loader2 className="animate-spin" size={16} /> : <DollarSign size={16} />}
+              {settling ? "Processing..." : `Settle ₹${totalBill}`}
             </button>
           </div>
         </div>

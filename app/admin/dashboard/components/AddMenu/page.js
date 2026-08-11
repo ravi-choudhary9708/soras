@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useRef } from "react";
 import { PlusCircle, Image, Utensils, IndianRupee, Eye, Check } from "lucide-react";
+import { fetchWithAuth } from "@/utils/fetchWithAuth";
 
 export default function AddMenu() {
   const fileInputRef = useRef(null);
@@ -36,7 +37,7 @@ export default function AddMenu() {
 
     try {
       // Step A: Request the signature from your backend
-      const sigRes = await fetch("/api/media/getUploadSignature", {
+      const sigRes = await fetchWithAuth("/api/media/getUploadSignature", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "menu" })
@@ -59,7 +60,7 @@ export default function AddMenu() {
       const secureImageUrl = cloudData.secure_url;
 
       // Step C: Send the payload to your backend menu controller
-      const backendRes = await fetch("/api/res/menu/add", {
+      const backendRes = await fetchWithAuth("/api/res/menu/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

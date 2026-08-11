@@ -23,7 +23,9 @@ export default function AuthPage() {
     // Handle smooth transition redirect based on role structure
     setTimeout(() => {
       if (selectedRole === 'manager') {
-        router.push('/dashboard/setup');
+        router.push('/admin/dashboard');
+      } else if (selectedRole === 'admin') {
+        router.push('/admin/super');
       } else {
         router.push('/dashboard');
       }
@@ -41,7 +43,9 @@ export default function AuthPage() {
     // Route to correct layout views depending on user permissions
     setTimeout(() => {
       if (selectedRole === 'manager') {
-        router.push('/dashboard/setup');
+        router.push('/admin/dashboard');
+      } else if (selectedRole === 'admin') {
+        router.push('/admin/super');
       } else {
         router.push('/dashboard');
       }

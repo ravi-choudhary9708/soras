@@ -19,13 +19,13 @@ import { apiResponse } from "@/utils/apiResponse";
         const currentUser= req.user;
         console.log("current user in submit payment", currentUser);
         if(!currentUser ){
-            return NextResponse.json(new apiError(401,"unauthorized"));
+            return NextResponse.json(new apiError(400,"Manager ID missing"));
         }
         const {screenshotUrl,cloudinaryPublicId, note}= await req.json();
         
 
         if(!screenshotUrl || !cloudinaryPublicId){
-            return NextResponse.json(new apiError(401,"payment screenshot is required"));
+            return NextResponse.json(new apiError(400,"payment screenshot is required"));
         }
         const restaurant= await Restaurant.findById(currentUser.restaurantId);
         if(!restaurant){
@@ -64,4 +64,4 @@ console.log("created payment in submit payment", payment);
     }
 }
 
-export const POST= withAuth(submitPayment,"manager");
+export const POST = withAuth(submitPayment, ["manager"]);
