@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, use } from "react";
 import { ShoppingCart, Plus, Minus, X, Check, Clock, ChefHat, Loader2, UtensilsCrossed, AlertCircle } from "lucide-react";
 
 // Helper: group menu items by category
@@ -17,7 +17,7 @@ const STATUS_LABELS = { pending: "Order Received", preparing: "Being Prepared", 
 const STATUS_COLORS = { pending: "text-amber-600", preparing: "text-blue-600", ready: "text-emerald-600", served: "text-slate-500" };
 
 export default function CustomerStorefront({ params }) {
-  const { masterQrCode } = params;
+  const { masterQrCode } = use(params);
 
   // Session state
   const [session, setSession] = useState(null);    // { restaurantId, tableNumber, sessionToken, menu }
@@ -88,25 +88,30 @@ export default function CustomerStorefront({ params }) {
   }, [fetchLiveOrders, session, tableId]);
 
   // ── 3. Cart Logic ───────────────────────────────────────────────────────
-  const addToCart = (item) => {
+  const addToCart = (item, portion = 'full') => {
+    const cartItemId = `${item._id}-${portion}`;
     setCart(prev => {
-      const existing = prev.find(c => c.menuItemId === item._id);
-      if (existing) return prev.map(c => c.menuItemId === item._id ? { ...c, quantity: c.quantity + 1 } : c);
-      return [...prev, { menuItemId: item._id, name: item.name, price: item.price, quantity: 1, isVeg: item.isVeg }];
+      const existing = prev.find(c => c.cartItemId === cartItemId);
+      if (existing) return prev.map(c => c.cartItemId === cartItemId ? { ...c, quantity: c.quantity + 1 } : c);
+      
+      const itemPrice = portion === 'half' ? Math.ceil((item.price || 0) / 2) : item.price;
+      const itemName = portion === 'half' ? `${item.name} (Half)` : item.name;
+      
+      return [...prev, { cartItemId, menuItemId: item._id, name: itemName, price: itemPrice, quantity: 1, isVeg: item.isVeg, portion }];
     });
   };
 
-  const removeFromCart = (menuItemId) => {
+  const removeFromCart = (cartItemId) => {
     setCart(prev => {
-      const existing = prev.find(c => c.menuItemId === menuItemId);
-      if (existing?.quantity === 1) return prev.filter(c => c.menuItemId !== menuItemId);
-      return prev.map(c => c.menuItemId === menuItemId ? { ...c, quantity: c.quantity - 1 } : c);
+      const existing = prev.find(c => c.cartItemId === cartItemId);
+      if (existing?.quantity === 1) return prev.filter(c => c.cartItemId !== cartItemId);
+      return prev.map(c => c.cartItemId === cartItemId ? { ...c, quantity: c.quantity - 1 } : c);
     });
   };
 
   const cartTotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const cartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
-  const getQty = (id) => cart.find(c => c.menuItemId === id)?.quantity || 0;
+  const getQty = (id, portion = 'full') => cart.find(c => c.cartItemId === `${id}-${portion}`)?.quantity || 0;
 
   // ── 4. Place Order ─────────────────────────────────────────────────────
   const placeOrder = async () => {
@@ -121,7 +126,7 @@ export default function CustomerStorefront({ params }) {
           restaurantId: session.restaurantId,
           tableNumber: session.tableNumber,
           sessionToken: session.sessionToken,
-          items: cart.map(c => ({ menuItemId: c.menuItemId, quantity: c.quantity })),
+          items: cart.map(c => ({ menuItemId: c.menuItemId, quantity: c.quantity, name: c.name, price: c.price, portion: c.portion })),
         }),
       });
       const data = await res.json();
@@ -261,27 +266,68 @@ export default function CustomerStorefront({ params }) {
                     )}
                     <p className="text-sm font-black text-slate-800 mt-1">₹{item.price}</p>
                   </div>
-
-                  {/* Add / Quantity Controls */}
-                  {qty === 0 ? (
-                    <button
-                      onClick={() => addToCart(item)}
-                      className="flex-shrink-0 w-9 h-9 rounded-xl bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition shadow-sm shadow-purple-600/20"
-                    >
-                      <Plus size={16} />
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <button onClick={() => removeFromCart(item._id)} className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition">
-                        <Minus size={14} className="text-slate-700" />
+                  
+                  {!item.isHalfAllowed && (
+                    getQty(item._id, 'full') === 0 ? (
+                      <button
+                        onClick={() => addToCart(item, 'full')}
+                        className="flex-shrink-0 w-9 h-9 rounded-xl bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition shadow-sm shadow-purple-600/20"
+                      >
+                        <Plus size={16} />
                       </button>
-                      <span className="text-sm font-black text-slate-900 w-4 text-center">{qty}</span>
-                      <button onClick={() => addToCart(item)} className="w-8 h-8 rounded-lg bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition">
-                        <Plus size={14} />
-                      </button>
-                    </div>
+                    ) : (
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button onClick={() => removeFromCart(`${item._id}-full`)} className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition">
+                          <Minus size={14} className="text-slate-700" />
+                        </button>
+                        <span className="text-sm font-black text-slate-900 w-4 text-center">{getQty(item._id, 'full')}</span>
+                        <button onClick={() => addToCart(item, 'full')} className="w-8 h-8 rounded-lg bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition">
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    )
                   )}
                 </div>
+
+                {/* Portion Controls */}
+                {item.isHalfAllowed && (
+                  <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-4">
+                    {/* Full */}
+                    <div className="flex-1 flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Full (₹{item.price})</span>
+                      {getQty(item._id, 'full') === 0 ? (
+                        <button onClick={() => addToCart(item, 'full')} className="w-full py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center transition">
+                          Add Full
+                        </button>
+                      ) : (
+                        <div className="flex items-center justify-between bg-slate-100 rounded-lg p-1">
+                          <button onClick={() => removeFromCart(`${item._id}-full`)} className="w-6 h-6 rounded bg-white shadow-sm flex items-center justify-center text-slate-700"><Minus size={12} /></button>
+                          <span className="text-xs font-black text-slate-900">{getQty(item._id, 'full')}</span>
+                          <button onClick={() => addToCart(item, 'full')} className="w-6 h-6 rounded bg-purple-600 text-white shadow-sm flex items-center justify-center"><Plus size={12} /></button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="w-px h-8 bg-slate-200" />
+                    
+                    {/* Half */}
+                    <div className="flex-1 flex flex-col gap-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Half (₹{Math.ceil((item.price||0)/2)})</span>
+                      {getQty(item._id, 'half') === 0 ? (
+                        <button onClick={() => addToCart(item, 'half')} className="w-full py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center transition">
+                          Add Half
+                        </button>
+                      ) : (
+                        <div className="flex items-center justify-between bg-slate-100 rounded-lg p-1">
+                          <button onClick={() => removeFromCart(`${item._id}-half`)} className="w-6 h-6 rounded bg-white shadow-sm flex items-center justify-center text-slate-700"><Minus size={12} /></button>
+                          <span className="text-xs font-black text-slate-900">{getQty(item._id, 'half')}</span>
+                          <button onClick={() => addToCart(item, 'half')} className="w-6 h-6 rounded bg-purple-600 text-white shadow-sm flex items-center justify-center"><Plus size={12} /></button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
               </div>
             </div>
           );
@@ -322,17 +368,17 @@ export default function CustomerStorefront({ params }) {
             {/* Cart Items */}
             <div className="flex-1 overflow-y-auto space-y-3">
               {cart.map(item => (
-                <div key={item.menuItemId} className="flex items-center justify-between bg-slate-50 rounded-xl p-3">
+                <div key={item.cartItemId} className="flex items-center justify-between bg-slate-50 rounded-xl p-3">
                   <div>
                     <p className="text-sm font-bold text-slate-900 capitalize">{item.name}</p>
                     <p className="text-xs text-slate-400">₹{item.price} each</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => removeFromCart(item.menuItemId)} className="w-7 h-7 rounded-lg bg-white border flex items-center justify-center hover:bg-slate-100">
+                    <button onClick={() => removeFromCart(item.cartItemId)} className="w-7 h-7 rounded-lg bg-white border flex items-center justify-center hover:bg-slate-100">
                       <Minus size={13} className="text-slate-700" />
                     </button>
                     <span className="text-sm font-black w-5 text-center">{item.quantity}</span>
-                    <button onClick={() => addToCart({ _id: item.menuItemId, name: item.name, price: item.price })} className="w-7 h-7 rounded-lg bg-purple-600 text-white flex items-center justify-center hover:bg-purple-700">
+                    <button onClick={() => addToCart({ _id: item.menuItemId, name: item.name.replace(' (Half)', ''), price: item.portion === 'half' ? item.price * 2 : item.price, isVeg: item.isVeg }, item.portion)} className="w-7 h-7 rounded-lg bg-purple-600 text-white flex items-center justify-center hover:bg-purple-700">
                       <Plus size={13} />
                     </button>
                   </div>

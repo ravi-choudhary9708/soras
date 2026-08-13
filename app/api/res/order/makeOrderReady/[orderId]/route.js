@@ -10,7 +10,7 @@ async function makeOrderReadyHandler(req,{params}){
    try {
      await dbConnect();
     const {restaurantId}= req.user;
-    const {orderId}= params;
+    const {orderId} = await params;
 
     if(!orderId){
         return NextResponse.json(new apiError(400,"order not found"))

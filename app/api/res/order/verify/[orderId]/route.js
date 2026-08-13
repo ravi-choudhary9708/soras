@@ -10,7 +10,7 @@ import { NextResponse } from "next/server";
 async function verifyOrder(req,{params}){
     try {
         await dbConnect();
-        const {orderId}= params;
+        const { orderId } = await params;
         const restaurantId=req.user.restaurantId;
         const staffId=req.user._id;
 

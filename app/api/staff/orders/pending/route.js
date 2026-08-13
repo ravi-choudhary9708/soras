@@ -1,5 +1,6 @@
 import dbConnect from "@/libs/dbConnect";
 import { Order } from "@/models/order.model";
+import { Table } from "@/models/table.model";
 import { apiError } from "@/utils/apiError";
 import { apiResponse } from "@/utils/apiResponse";
 import { withAuth } from "@/utils/withAuth";

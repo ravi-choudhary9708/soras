@@ -1,6 +1,8 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
+Username / Email: ravichy.in@gmail.com (or superadmin)
+Password: password123
 
 First, run the development server:
 

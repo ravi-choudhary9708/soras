@@ -26,8 +26,12 @@ export default function AuthPage() {
         router.push('/admin/dashboard');
       } else if (selectedRole === 'admin') {
         router.push('/admin/super');
-      } else {
+      } else if (selectedRole === 'staff') {
         router.push('/dashboard');
+      } else if (selectedRole === 'chef') {
+        router.push('/chef');
+      } else {
+        router.push('/dashboard'); // default fallback (customer)
       }
     }, 1500);
   };
@@ -46,8 +50,12 @@ export default function AuthPage() {
         router.push('/admin/dashboard');
       } else if (selectedRole === 'admin') {
         router.push('/admin/super');
-      } else {
+      } else if (selectedRole === 'staff') {
         router.push('/dashboard');
+      } else if (selectedRole === 'chef') {
+        router.push('/chef');
+      } else {
+        router.push('/dashboard'); // default fallback (customer)
       }
     }, 1200);
   };

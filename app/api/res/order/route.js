@@ -18,7 +18,13 @@ async function listOrders(req) {
         const skip = (page - 1) * limit;
 
         const filter = { restaurantId };
-        if (status) filter.orderStatus = status;
+        if (status) {
+            if (status === "active") {
+                filter.orderStatus = { $in: ["preparing", "ready", "served"] };
+            } else {
+                filter.orderStatus = status;
+            }
+        }
         if (tableId) filter.tableId = tableId;
 
         const [orders, total] = await Promise.all([

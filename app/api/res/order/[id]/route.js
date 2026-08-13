@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
 async function getOrderById(req, { params }) {
     try {
         await dbConnect();
-        const { id } = params;
+        const { id } = await params;
         const { restaurantId } = req.user;
 
         const order = await Order.findOne({ _id: id, restaurantId })

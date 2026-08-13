@@ -11,4 +11,4 @@ async function getMeHandler(req) {
     );
 }
 
-export const GET = withAuth(getMeHandler, ["manager", "staff"]);
+export const GET = withAuth(getMeHandler, ["manager", "staff", "chef", "admin"]);

@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useState, useRef, useCallback } from "react";
 import UserProfileDropdown from "@/app/components/dashboard/userProfile/page";
-import { CheckCircle2, ChefHat, UtensilsCrossed, Clock, Loader2, ClipboardList, ShoppingBag } from "lucide-react";
+import { CheckCircle2, ChefHat, UtensilsCrossed, Clock, Loader2 } from "lucide-react";
 import { fetchWithAuth } from "@/utils/fetchWithAuth";
-import StaffOrderPanel from "@/app/dashboard/components/StaffOrderPanel";
 
 const STATUS_COLORS = {
   pending: "border-l-amber-400 bg-amber-50/60",
@@ -17,11 +16,10 @@ const STATUS_BADGES = {
   ready: "bg-emerald-100 text-emerald-700",
 };
 
-export default function TerminalDashboard() {
+export default function ChefDashboard() {
   const [orders, setOrders] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [actionLoading, setActionLoading] = useState({});
-  const [activeTab, setActiveTab] = useState("orders"); // 'orders' | 'place'
   const lastPlayedMinuteRef = useRef(-1);
 
   // Fetch logged-in staff/manager profile
@@ -45,8 +43,10 @@ export default function TerminalDashboard() {
       const res = await fetchWithAuth("/api/staff/orders/pending");
       const data = await res.json();
       if (data.success) {
-        setOrders(data.data);
-        processSmartAlerts(data.data);
+        // Chefs don't need to see orders that are already ready (unless we want to show history)
+        const chefOrders = data.data.filter(o => o.orderStatus !== 'ready');
+        setOrders(chefOrders);
+        processSmartAlerts(chefOrders);
       }
     } catch (err) {
       console.error("Sync error", err);
@@ -64,8 +64,7 @@ export default function TerminalDashboard() {
     if (age >= 5 && age < 10) {
       if (currentMinute !== lastPlayedMinuteRef.current) {
         lastPlayedMinuteRef.current = currentMinute;
-        if (currentUser?.role === "staff") playNotificationSound("/sounds/gentle-nudge.mp3");
-        if (currentUser?.role === "manager") playNotificationSound("/sounds/manager-alert.mp3");
+        if (currentUser?.role === "chef") playNotificationSound("/sounds/gentle-nudge.mp3");
       }
     }
 
@@ -141,16 +140,16 @@ export default function TerminalDashboard() {
   }, {});
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] flex flex-col">
+    <div className="min-h-screen bg-[#1A1A1A] text-slate-200 flex flex-col">
 
       {/* ─── Sticky Top Header ─── */}
-      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm px-6 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-10 bg-[#141414]/90 backdrop-blur-md border-b border-[#2A2A2A] shadow-sm px-6 py-3 flex items-center justify-between">
         <div>
-          <h1 className="text-sm font-black text-slate-700">SORAS</h1>
-          <p className="text-[11px] text-slate-400 font-medium">Staff Order Terminal</p>
+          <h1 className="text-sm font-black text-white">SORAS KOT</h1>
+          <p className="text-[11px] text-orange-500 font-medium tracking-widest uppercase">Chef Dashboard</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[11px] font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
+          <span className="text-[11px] font-bold text-orange-500 bg-orange-500/10 border border-orange-500/20 px-3 py-1 rounded-full">
             {orders.length} active orders
           </span>
           <UserProfileDropdown
@@ -160,121 +159,81 @@ export default function TerminalDashboard() {
         </div>
       </header>
 
-      {/* ─── Tab Switcher ─── */}
-      <div className="flex gap-1 px-4 pt-3 bg-white border-b border-slate-100">
-        <button
-          onClick={() => setActiveTab("orders")}
-          className={`flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-t-xl transition border-b-2 ${
-            activeTab === "orders" ? "border-amber-500 text-amber-600 bg-amber-50" : "border-transparent text-slate-400 hover:text-slate-600"
-          }`}
-        >
-          <ClipboardList size={14} /> Live Orders
-        </button>
-        {(currentUser?.role === "staff" || currentUser?.role === "manager" || currentUser?.role === "admin") && (
-          <button
-            onClick={() => setActiveTab("place")}
-            className={`flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-t-xl transition border-b-2 ${
-              activeTab === "place" ? "border-amber-500 text-amber-600 bg-amber-50" : "border-transparent text-slate-400 hover:text-slate-600"
-            }`}
-          >
-            <ShoppingBag size={14} /> Take Order
-          </button>
-        )}
-      </div>
-
-      {/* ─── Tab Content ─── */}
-      {activeTab === "place" ? (
-        <div className="flex-1 overflow-hidden">
-          <StaffOrderPanel />
-        </div>
-      ) : (
-        <div className="flex-1 p-4 space-y-6">
-          {orders.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-              <UtensilsCrossed size={40} className="mb-3 opacity-30" />
-              <p className="text-sm font-medium">No active orders right now.</p>
-              <p className="text-xs mt-1">New orders will appear here automatically.</p>
-            </div>
+      {/* ─── Order Cards ─── */}
+      <div className="flex-1 p-4 space-y-6">
+        {orders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-slate-500">
+            <ChefHat size={40} className="mb-3 opacity-30" />
+            <p className="text-sm font-medium">Kitchen is all clear!</p>
+            <p className="text-xs mt-1">New orders will appear here automatically.</p>
+          </div>
         ) : (
           Object.entries(grouped).map(([tableLabel, tableOrders]) => (
             <div key={tableLabel}>
-              <h2 className="text-xs font-black text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <span className="w-5 h-5 bg-slate-200 rounded-md flex items-center justify-center text-[10px]">🍽</span>
+              <h2 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <span className="w-5 h-5 bg-[#2A2A2A] rounded-md flex items-center justify-center text-[10px]">🔥</span>
                 {tableLabel}
               </h2>
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {tableOrders.map(order => {
                   const isLoading = actionLoading[order._id];
                   const urgency = order.minutesOld >= 10 ? "red" : order.minutesOld >= 5 ? "orange" : "green";
-
+                  const urgencyBorder = urgency === "red" ? "border-l-red-500" : urgency === "orange" ? "border-l-orange-500" : "border-l-blue-500";
+                  
                   return (
                     <div
                       key={order._id}
-                      className={`bg-white rounded-2xl border-l-4 shadow-sm p-4 transition-all ${STATUS_COLORS[order.orderStatus] || "border-l-slate-300"} ${urgency === "red" ? "animate-pulse" : ""}`}
+                      className={`bg-[#202020] rounded-2xl border border-[#2A2A2A] border-l-4 shadow-lg p-4 transition-all ${urgencyBorder} ${urgency === "red" ? "animate-pulse" : ""}`}
                     >
                       {/* Order Header */}
-                      <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-start justify-between mb-3 border-b border-[#2A2A2A] pb-3">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${STATUS_BADGES[order.orderStatus] || "bg-slate-100 text-slate-600"}`}>
+                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${order.orderStatus === 'preparing' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}`}>
                               {order.orderStatus}
                             </span>
                             {order.isVerified && (
-                              <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">Verified</span>
+                              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full">Verified</span>
                             )}
                           </div>
-                          <p className="text-[11px] text-slate-400 mt-1 font-mono">#{order._id?.slice(-6)}</p>
+                          <p className="text-[11px] text-slate-500 mt-1 font-mono">#{order._id?.slice(-6)}</p>
                         </div>
-                        <div className={`flex items-center gap-1 text-xs font-black ${urgency === "red" ? "text-red-600" : urgency === "orange" ? "text-orange-500" : "text-emerald-600"}`}>
+                        <div className={`flex items-center gap-1 text-xs font-black ${urgency === "red" ? "text-red-400" : urgency === "orange" ? "text-orange-400" : "text-blue-400"}`}>
                           <Clock size={12} />
                           {order.minutesOld}m ago
                         </div>
                       </div>
 
                       {/* Order Items */}
-                      <div className="bg-slate-50 rounded-xl p-3 mb-3 space-y-1">
+                      <div className="bg-[#1A1A1A] rounded-xl p-3 mb-4 space-y-2 border border-[#2A2A2A]">
                         {(order.items || []).map((item, i) => (
-                          <div key={i} className="flex justify-between text-xs text-slate-700">
-                            <span className="font-medium capitalize">{item.name} <span className="text-slate-400">× {item.quantity}</span></span>
-                            <span className="font-bold">₹{item.price * item.quantity}</span>
+                          <div key={i} className="flex justify-between items-start text-xs text-slate-300">
+                            <span className="font-medium capitalize text-white flex-1">{item.name}</span>
+                            <span className="font-black text-orange-500 ml-2 bg-orange-500/10 px-2 rounded">× {item.quantity}</span>
                           </div>
                         ))}
-                        <div className="border-t border-slate-200 pt-1 mt-1 flex justify-between text-xs font-black">
-                          <span>Total</span>
-                          <span>₹{order.totalAmount}</span>
-                        </div>
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 mt-auto">
                         {order.orderStatus === "pending" && !order.isVerified && (currentUser?.role === 'staff' || currentUser?.role === 'manager') && (
                           <button
                             disabled={!!isLoading}
                             onClick={() => approveOrder(order._id)}
-                            className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-bold py-2.5 rounded-xl transition"
+                            className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600/80 hover:bg-emerald-600 disabled:bg-[#2A2A2A] disabled:text-slate-600 text-white text-xs font-bold py-3 rounded-xl transition"
                           >
                             {isLoading === "approving" ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle2 size={13} />}
-                            Approve Order
+                            Verify
                           </button>
                         )}
                         {(order.orderStatus === "preparing" || (order.orderStatus === "pending" && order.isVerified)) && (currentUser?.role === 'chef' || currentUser?.role === 'manager') && (
                           <button
                             disabled={!!isLoading}
                             onClick={() => markReady(order._id)}
-                            className="flex-1 flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-bold py-2.5 rounded-xl transition"
+                            className="flex-1 flex items-center justify-center gap-1.5 bg-orange-600 hover:bg-orange-500 disabled:bg-[#2A2A2A] disabled:text-slate-600 text-white text-xs font-bold py-3 rounded-xl transition shadow-lg shadow-orange-900/20"
                           >
                             {isLoading === "ready" ? <Loader2 size={13} className="animate-spin" /> : <ChefHat size={13} />}
-                            Mark Ready
-                          </button>
-                        )}
-                        {order.orderStatus === "ready" && (currentUser?.role === 'staff' || currentUser?.role === 'manager') && (
-                          <button
-                            disabled={!!isLoading}
-                            onClick={() => markServed(order._id)}
-                            className="flex-1 flex items-center justify-center gap-1.5 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-bold py-2.5 rounded-xl transition"
-                          >
-                            {isLoading === "served" ? <Loader2 size={13} className="animate-spin" /> : <UtensilsCrossed size={13} />}
-                            Mark Served
+                            Food is Ready
                           </button>
                         )}
                       </div>
@@ -286,7 +245,6 @@ export default function TerminalDashboard() {
           ))
         )}
       </div>
-      )}
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
 async function deleteStaff(req, { params }) {
     try {
         await dbConnect();
-        const { id } = params;
+        const { id } =await params;
         const { restaurantId, _id: managerId } = req.user;
 
         // Prevent manager from deleting themselves

@@ -37,7 +37,7 @@ export default function TablesFloor() {
     setFeedback("");
     setOrdersLoading(true);
     try {
-      const res = await fetchWithAuth(`/api/res/order?tableId=${table._id}&status=served`);
+      const res = await fetchWithAuth(`/api/res/order?tableId=${table._id}&status=active`);
       const data = await res.json();
       if (data.success) setTableOrders(data.data.orders || []);
     } catch (err) {
@@ -53,22 +53,28 @@ export default function TablesFloor() {
     if (!selectedTable || tableOrders.length === 0) return;
     setSettling(true);
     try {
-      // Settle each order and clear the table
-      for (const order of tableOrders) {
-        await fetchWithAuth("/api/res/order/payment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderId: order._id, tableId: selectedTable._id, paymentMode })
-        });
+      const res = await fetchWithAuth(`/api/manager/table/settle/${selectedTable._id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          cashPaid: paymentMode === "cash" ? totalBill : 0, 
+          upiPaid: paymentMode === "upi" ? totalBill : 0 
+        })
+      });
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        setFeedback("✅ Table settled successfully!");
+        setTimeout(() => {
+          setSelectedTable(null);
+          setTableOrders([]);
+          fetchTables();
+        }, 1200);
+      } else {
+        setFeedback(`❌ ${data.message || "Settlement failed. Please try again."}`);
       }
-      setFeedback("✅ Table settled successfully!");
-      setTimeout(() => {
-        setSelectedTable(null);
-        setTableOrders([]);
-        fetchTables();
-      }, 1200);
     } catch (err) {
-      setFeedback("❌ Settlement failed. Please try again.");
+      setFeedback("❌ Settlement failed due to a network error.");
     } finally {
       setSettling(false);
     }
@@ -158,7 +164,7 @@ export default function TablesFloor() {
                 </div>
               ) : tableOrders.length === 0 ? (
                 <div className="text-center text-slate-400 py-8">
-                  <p className="font-semibold text-sm">No served orders found for this table.</p>
+                  <p className="font-semibold text-sm">No active orders found for this table.</p>
                 </div>
               ) : (
                 <>

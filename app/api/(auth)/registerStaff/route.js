@@ -24,12 +24,12 @@ try {
     if(currentUser.role!="manager"||!currentUser ){
         return NextResponse.json(new apiError(401,"unauthorized")); // This is correct, leave as 401
     }
-    const {email,username,fullName,password,phone}=await req.json();
+    const {email,username,fullName,password,phone,role: requestedRole}=await req.json();
 
     if([username,email,phone,fullName,password].some(feild=>!feild || feild.trim()=="")){
         return NextResponse.json(new apiError(400,"all feild is required"));
     }
-    const role="staff";
+    const role = requestedRole === "chef" ? "chef" : "staff";
     const existingUser= await User.findOne({$or:[{username},{email}]});
     if(existingUser){
         return NextResponse.json(new apiError(409,"user already exists"));

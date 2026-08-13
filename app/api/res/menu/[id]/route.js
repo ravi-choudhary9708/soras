@@ -13,7 +13,7 @@ async function updateMenuItem(req, { params }) {
         const updates = await req.json();
 
         // Allow only safe fields to be updated
-        const allowed = ["name", "description", "price", "category", "isVeg", "image", "isAvailable"];
+        const allowed = ["name", "description", "price", "category", "isVeg", "image", "isAvailable", "isHalfAllowed"];
         const sanitized = {};
         for (const key of allowed) {
             if (updates[key] !== undefined) sanitized[key] = updates[key];

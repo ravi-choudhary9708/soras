@@ -10,9 +10,9 @@ import { NextResponse } from "next/server";
 
 
 async function settleTableHandler(req,{params}){
-   try {
-     await dbConnect();
-    const {tableId}= params;
+    try {
+      await dbConnect();
+     const { tableId } = await params;
     const {restaurantId}= req.user;
     const {cashPaid=0, upiPaid=0}= await req.json();
     if(cashPaid<0 || upiPaid<0){
@@ -40,16 +40,16 @@ async function settleTableHandler(req,{params}){
                 // Fetch the locked table state tied to this atomic session context
                 const table = await Table.findOne({ _id: id, restaurantId }).session(session);
 
-                // Fetch ALL served orders currently linked to this dining sitting session
+                // Fetch ALL active (verified) orders currently linked to this dining sitting session
                 const activeOrders = await Order.find({
                     restaurantId,
                     tableNumber: table.tableNumber,
                     sessionToken: table.sessionToken,
-                    orderStatus: "served"
+                    orderStatus: { $in: ["preparing", "ready", "served"] }
                 }).session(session);
 
                 if (activeOrders.length === 0) {
-                    throw new Error("ERR_NO_ORDERS: No served orders found to settle for this table session");
+                    throw new Error("ERR_NO_ORDERS: No active/verified orders found to settle for this table session");
                 }
 
                 // Aggregate absolute billing data across all order documents

@@ -8,7 +8,7 @@ import dbConnect from "@/libs/dbConnect";
 async function addMenuItem(req) {
     try {
         await dbConnect();
-        const { name, description, price, category, isVeg, image } = await req.json();
+        const { name, description, price, category, isVeg, image, isHalfAllowed } = await req.json();
         if (!name || !price || !category || isVeg === undefined) {
             return NextResponse.json(new apiError(400, "name, price, isVeg and category are required"));
         }
@@ -21,6 +21,7 @@ async function addMenuItem(req) {
             category,
             isVeg,
             image: image || "",
+            isHalfAllowed: isHalfAllowed || false,
         });
        
         console.log("menu item:",menuItem)

@@ -17,7 +17,7 @@ export default function MenuManager() {
 
   // Add form state
   const fileInputRef = useRef(null);
-  const [addForm, setAddForm] = useState({ name: "", price: "", category: "main course", description: "", isVeg: true });
+  const [addForm, setAddForm] = useState({ name: "", price: "", category: "main course", description: "", isVeg: true, isHalfAllowed: false });
   const [selectedFile, setSelectedFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [adding, setAdding] = useState(false);
@@ -43,7 +43,7 @@ export default function MenuManager() {
 
   const startEdit = (item) => {
     setEditingId(item._id);
-    setEditForm({ name: item.name, price: item.price, category: item.category, description: item.description || "", isVeg: item.isVeg, isAvailable: item.isAvailable });
+    setEditForm({ name: item.name, price: item.price, category: item.category, description: item.description || "", isVeg: item.isVeg, isAvailable: item.isAvailable, isHalfAllowed: item.isHalfAllowed || false });
   };
 
   const saveEdit = async (id) => {
@@ -138,7 +138,7 @@ export default function MenuManager() {
       const data = await res.json();
       if (data.success) {
         showFeedback("success", "Menu item added!");
-        setAddForm({ name: "", price: "", category: "main course", description: "", isVeg: true });
+        setAddForm({ name: "", price: "", category: "main course", description: "", isVeg: true, isHalfAllowed: false });
         setSelectedFile(null); setImagePreview(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
         fetchMenu();
@@ -196,16 +196,27 @@ export default function MenuManager() {
                 <input required type="number" value={addForm.price} onChange={e => setAddForm({ ...addForm, price: e.target.value })}
                   placeholder="249" className="w-full bg-slate-50 border rounded-xl px-3 py-2.5 text-sm font-bold outline-none focus:border-purple-500" />
               </div>
-              <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Dietary Type</label>
-                <div className="flex gap-2 h-[42px] items-center">
-                  {[true, false].map(v => (
-                    <button key={String(v)} type="button" onClick={() => setAddForm({ ...addForm, isVeg: v })}
-                      className={`flex-1 h-full rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5 ${addForm.isVeg === v ? (v ? "bg-emerald-50 border-emerald-300 text-emerald-800" : "bg-rose-50 border-rose-300 text-rose-800") : "bg-slate-50 border-slate-200 text-slate-400"}`}>
-                      <span className={`w-2.5 h-2.5 rounded-full border ${v ? "bg-emerald-500 border-emerald-600" : "bg-rose-500 border-rose-600"}`} />
-                      {v ? "Veg" : "Non-Veg"}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Dietary Type</label>
+                  <div className="flex gap-2 h-[42px] items-center">
+                    {[true, false].map(v => (
+                      <button key={String(v)} type="button" onClick={() => setAddForm({ ...addForm, isVeg: v })}
+                        className={`flex-1 h-full rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5 ${addForm.isVeg === v ? (v ? "bg-emerald-50 border-emerald-300 text-emerald-800" : "bg-rose-50 border-rose-300 text-rose-800") : "bg-slate-50 border-slate-200 text-slate-400"}`}>
+                        <span className={`w-2.5 h-2.5 rounded-full border ${v ? "bg-emerald-500 border-emerald-600" : "bg-rose-500 border-rose-600"}`} />
+                        {v ? "Veg" : "Non-Veg"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Half Portion Allowed?</label>
+                  <div className="flex gap-2 h-[42px] items-center">
+                    <button type="button" onClick={() => setAddForm({ ...addForm, isHalfAllowed: !addForm.isHalfAllowed })}
+                      className={`flex-1 h-full rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5 ${addForm.isHalfAllowed ? "bg-purple-50 border-purple-300 text-purple-800" : "bg-slate-50 border-slate-200 text-slate-400"}`}>
+                      {addForm.isHalfAllowed ? "Yes (Calculate 50%)" : "No"}
                     </button>
-                  ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -255,7 +266,12 @@ export default function MenuManager() {
                   <tr key={item._id} className="hover:bg-slate-50/40">
                     {editingId === item._id ? (
                       <>
-                        <td className="p-3"><input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} className="w-full bg-slate-100 border rounded-lg px-2 py-1.5 text-xs font-bold outline-none focus:border-purple-400" /></td>
+                        <td className="p-3">
+                          <input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} className="w-full bg-slate-100 border rounded-lg px-2 py-1.5 text-xs font-bold outline-none focus:border-purple-400 mb-1" />
+                          <button onClick={() => setEditForm({...editForm, isHalfAllowed: !editForm.isHalfAllowed})} className={`text-[9px] font-bold px-1.5 py-0.5 rounded border transition ${editForm.isHalfAllowed ? "bg-purple-100 text-purple-700 border-purple-200" : "bg-slate-100 text-slate-500 border-slate-200"}`}>
+                            {editForm.isHalfAllowed ? "HALF ALLOWED" : "NO HALF"}
+                          </button>
+                        </td>
                         <td className="p-3">
                           <select value={editForm.category} onChange={e => setEditForm({ ...editForm, category: e.target.value })} className="bg-slate-100 border rounded-lg px-2 py-1.5 text-xs outline-none focus:border-purple-400">
                             {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -277,7 +293,10 @@ export default function MenuManager() {
                             {item.image ? <img src={item.image} className="w-9 h-9 rounded-lg object-cover border" /> : <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center"><Utensils size={14} className="text-slate-300" /></div>}
                             <div>
                               <p className="font-bold text-slate-900 capitalize">{item.name}</p>
-                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${item.isVeg ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>{item.isVeg ? "VEG" : "NON-VEG"}</span>
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${item.isVeg ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>{item.isVeg ? "VEG" : "NON-VEG"}</span>
+                                {item.isHalfAllowed && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">HALF OPT</span>}
+                              </div>
                             </div>
                           </div>
                         </td>

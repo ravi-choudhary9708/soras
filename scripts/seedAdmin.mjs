@@ -14,16 +14,20 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
-// Inline definition of your schema to keep the execution completely independent and lightweight
-const adminSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+
+
+// Inline definition of your schema to avoid Next.js alias resolution issues in raw Node.js
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true },
   email: { type: String, required: true, unique: true },
+  phone: { type: String, required: true },
+  fullName: { type: String },
   password: { type: String, required: true },
   role: { type: String, required: true },
-  isAccountVerified: { type: Boolean, default: true }
+  restaurantId: { type: mongoose.Schema.Types.ObjectId, default: null }
 }, { timestamps: true });
 
-const Admin = mongoose.models.Admin || mongoose.model("Admin", adminSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 async function seedAdmin() {
   try {
@@ -32,33 +36,37 @@ async function seedAdmin() {
     console.log("🚀 Connection established perfectly!");
 
     // 🎯 DEFINE YOUR CREDENTIALS HERE Safely
-    const adminEmail = "ravichy.in"; // Replace with your professional email address
-    const plainPassword = "ravi9708"; // Replace with a strong, complex password string
+    const adminEmail = "ravichy.in@gmail.com"; 
+    const adminUsername = "superadmin";
+    const plainPassword = "password123";
 
     // Check if the administrator profile already exists
-    const existingAdmin = await Admin.findOne({ email: adminEmail });
+    const existingAdmin = await User.findOne({ email: adminEmail });
     if (existingAdmin) {
       console.log(`⚠️ User with email ${adminEmail} already exists inside your records. Seeding skipped.`);
       process.exit(0);
     }
 
-    // Hash the password exactly how your standard authentication routes expect it
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(plainPassword, salt);
 
     // Create the master super_admin document profile layout
-    const newAdmin = await Admin.create({
-      name: "Ravi chy",
+    const newAdmin = await User.create({
+      fullName: "Soras Admin",
+      username: adminUsername,
       email: adminEmail,
+      phone: "0000000000",
       password: hashedPassword,
-      role: "admin", // 👑 This gives you absolute clearance over all multi-tenant endpoints
-      isAccountVerified: true
+      role: "admin", 
+      restaurantId: null
     });
 
     console.log("-----------------------------------------------------");
     console.log("✅ SUPER ADMIN SEEDED SUCCESSFULLY!");
-    console.log(`👤 Name: ${newAdmin.name}`);
+    console.log(`👤 Name: ${newAdmin.fullName}`);
+    console.log(`👤 Username: ${newAdmin.username}`);
     console.log(`📧 Email: ${newAdmin.email}`);
+    console.log(`🔑 Password: ${plainPassword}`);
     console.log(`🔑 Role Signature: ${newAdmin.role}`);
     console.log("-----------------------------------------------------");
     console.log("🔒 Keep these credentials secret. You are ready to log into /admin/super!");

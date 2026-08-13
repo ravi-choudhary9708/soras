@@ -111,7 +111,10 @@ export default function RegisterForm({ onSubmit }) {
       });
 
       // Pass details back up to optional root hooks wrapper context logic
-      if (onSubmit) onSubmit(result);
+      if (onSubmit) {
+        const registeredRole = result?.data?.user?.role || role;
+        onSubmit(result, registeredRole);
+      }
 
     } catch (error) {
       setApiResponse({ type: 'error', message: error.message });

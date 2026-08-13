@@ -68,12 +68,12 @@ export default function LoginForm({ onSubmit }) {
       {/* Account Type Selector Toggle */}
       <div className="flex flex-col space-y-1.5">
         <label className="text-xs font-bold text-[#1A1A1A]">Select Account Type</label>
-        <div className="grid grid-cols-3 gap-2 p-1 bg-[#F4F4F6] rounded-xl">
+        <div className="grid grid-cols-4 gap-2 p-1 bg-[#F4F4F6] rounded-xl">
           <button
             type="button"
             disabled={isLoading}
             onClick={() => handleRoleChange('user')}
-            className={`py-2 text-xs font-bold rounded-lg transition-all ${
+            className={`py-2 text-[10px] font-bold rounded-lg transition-all ${
               role === 'user'
                 ? 'bg-white text-[#5D44FF] shadow-sm'
                 : 'text-[#626264] hover:text-[#1A1A1A] disabled:opacity-50'
@@ -85,7 +85,7 @@ export default function LoginForm({ onSubmit }) {
             type="button"
             disabled={isLoading}
             onClick={() => handleRoleChange('manager')}
-            className={`py-2 text-xs font-bold rounded-lg transition-all ${
+            className={`py-2 text-[10px] font-bold rounded-lg transition-all ${
               role === 'manager'
                 ? 'bg-white text-[#5D44FF] shadow-sm'
                 : 'text-[#626264] hover:text-[#1A1A1A] disabled:opacity-50'
@@ -96,8 +96,20 @@ export default function LoginForm({ onSubmit }) {
           <button
             type="button"
             disabled={isLoading}
+            onClick={() => handleRoleChange('staff')}
+            className={`py-2 text-[10px] font-bold rounded-lg transition-all ${
+              role === 'staff'
+                ? 'bg-white text-[#5D44FF] shadow-sm'
+                : 'text-[#626264] hover:text-[#1A1A1A] disabled:opacity-50'
+            }`}
+          >
+            Staff
+          </button>
+          <button
+            type="button"
+            disabled={isLoading}
             onClick={() => handleRoleChange('admin')}
-            className={`py-2 text-xs font-bold rounded-lg transition-all ${
+            className={`py-2 text-[10px] font-bold rounded-lg transition-all ${
               role === 'admin'
                 ? 'bg-white text-[#5D44FF] shadow-sm'
                 : 'text-[#626264] hover:text-[#1A1A1A] disabled:opacity-50'

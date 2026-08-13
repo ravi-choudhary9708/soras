@@ -10,7 +10,8 @@ import { apiError } from "@/utils/apiError";
 export async function GET(req, { params }) {
     try {
         await dbConnect();
-        const { masterQrCode } = params;
+        // In Next.js 15+, params is a Promise in API routes
+        const { masterQrCode } = await params;
         const now = new Date();
 
         // Attempt to claim the table atomically — only if free/session expired

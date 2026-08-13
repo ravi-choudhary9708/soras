@@ -54,9 +54,8 @@ try {
         menuItemId:item.menuItemId,
         quantity:item.quantity,
         name:item.name,
-        price:item.price || null
-
-
+        price:item.price || null,
+        portion: item.portion || 'full'
     }))
 
     // if its staff send directly
@@ -67,6 +66,7 @@ try {
         restaurantId,
         tableId:activeTable._id,
         tableNumber:activeTable.tableNumber,
+        sessionToken:activeTable.sessionToken,
         items:processedItems,
         customerId:!isStaffUser?authenticatedUserId:null,
         isVerifiedBy:isStaffUser?authenticatedUserId:null,

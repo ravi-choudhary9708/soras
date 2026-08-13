@@ -37,6 +37,10 @@ const menuItemSchema=new mongoose.Schema({
     isAvailable:{
         type:Boolean,
         default:true
+    },
+    isHalfAllowed:{
+        type:Boolean,
+        default:false
     }
 })
 

@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
 export async function GET(req, { params }) {
     try {
         await dbConnect();
-        const { restaurantId } = params;
+        const { restaurantId } = await params;
 
         // Verify restaurant exists and is active
         const restaurant = await Restaurant.findById(restaurantId).select("name isAccountActive");

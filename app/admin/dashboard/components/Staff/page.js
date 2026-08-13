@@ -17,7 +17,7 @@ const ROLE_ICONS = {
 export default function Staff() {
   const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ fullName: "", username: "", email: "", phone: "", password: "", role: "staff" });
+  const [form, setForm] = useState({ fullName: "", username: "", email: "", phone: "", password: "", role: "" });
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [deletingId, setDeletingId] = useState(null);
@@ -49,7 +49,7 @@ export default function Staff() {
       const data = await res.json();
       if (data.success) {
         setFeedback({ type: "success", message: "Staff member added successfully!" });
-        setForm({ fullName: "", username: "", email: "", phone: "", password: "", role: "staff" });
+        setForm({ fullName: "", username: "", email: "", phone: "", password: "", role: "" });
         fetchStaff();
       } else {
         setFeedback({ type: "error", message: data.message || "Registration failed" });

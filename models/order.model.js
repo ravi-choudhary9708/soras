@@ -16,6 +16,16 @@ const orderSchema=new mongoose.Schema({
         type:Schema.Types.ObjectId,
         ref:'Table'
     },
+    tableNumber: {
+        type: Number,
+        required: true,
+        index: true
+    },
+    sessionToken: {
+        type: String,
+        required: true,
+        index: true
+    },
     customerId: { 
         type: Schema.Types.ObjectId, 
         ref: 'User', 
@@ -70,24 +80,29 @@ orderStatus:{
 }
 },{timestamps:true})
 
-orderSchema.pre("save", async function(){
+orderSchema.pre("validate", async function(){
     const order=this;
     try {
         let calculatedTotal=0;
         for(let item of order.items){
-            if(!item.name|| !item.price){
+            if(!item.name || !item.price){
                 const masterItem= await MenuItem.findById(item.menuItemId);
                 if(!masterItem){
                     throw new apiError(404,"masterMenu doesnt exist for this id");
                 }
 
-                item.name=masterItem.name;
-                item.price=masterItem.price;
-
+                // Calculate half portion pricing dynamically
+                if (item.portion === 'half') {
+                    item.name = masterItem.name + " (Half)";
+                    item.price = Math.ceil(masterItem.price / 2); // Round up to nearest whole number if needed
+                } else {
+                    item.name = masterItem.name;
+                    item.price = masterItem.price;
+                }
             }
-            calculatedTotal+=item.price *item.quantity;
+            calculatedTotal += item.price * item.quantity;
         }
-        order.totalAmount=calculatedTotal;
+        order.totalAmount = calculatedTotal;
     } catch (error) {
         throw new apiError(500,"Error calculating order total: "+error.message);
     }

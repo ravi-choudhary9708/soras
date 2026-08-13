@@ -24,6 +24,11 @@ const orderItemSchema=new mongoose.Schema({
          required:true,
          index:true
     },
+    portion: {
+         type: String,
+         enum: ['full', 'half'],
+         default: 'full'
+    },
    kotPrintd:{
     type: Boolean,
     default:false,
