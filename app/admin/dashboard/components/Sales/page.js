@@ -57,7 +57,7 @@ export default function Sales() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-white p-5 border rounded-2xl shadow-xs">
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
             <IndianRupee size={11} /> Total Revenue
@@ -109,7 +109,7 @@ export default function Sales() {
       </div>
 
       {/* Order Status Breakdown */}
-      <div className="grid grid-cols-3 gap-4 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
         {[
           { label: "Pending", status: "pending", color: "bg-yellow-100 text-yellow-700" },
           { label: "Preparing", status: "preparing", color: "bg-blue-100 text-blue-700" },

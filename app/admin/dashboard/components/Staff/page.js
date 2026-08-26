@@ -92,7 +92,7 @@ export default function Staff() {
           <UserPlus size={16} /> Add New Staff Member
         </h3>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Full Name</label>
               <input required type="text" value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })}
@@ -153,6 +153,7 @@ export default function Staff() {
         ) : staffList.length === 0 ? (
           <div className="text-center py-8 text-slate-400 text-sm">No staff members yet.</div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/70 border-b text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -185,6 +186,7 @@ export default function Staff() {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

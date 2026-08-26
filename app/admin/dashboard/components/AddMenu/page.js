@@ -106,7 +106,7 @@ export default function AddMenu() {
         {/* 🛠️ LEFT: Control panel ingestion form */}
         <div className="bg-white border rounded-2xl p-6 shadow-xs lg:col-span-2 space-y-5">
           <form onSubmit={handleFormSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-[11px] font-bold text-slate-400 uppercase block mb-1">Item Title / Name</label>
                 <input
@@ -135,7 +135,7 @@ export default function AddMenu() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-[11px] font-bold text-slate-400 uppercase block mb-1">Price Vector (₹)</label>
                 <div className="relative">

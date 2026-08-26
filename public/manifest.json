@@ -1,0 +1,32 @@
+{
+  "name": "Soras — Restaurant Management",
+  "short_name": "Soras",
+  "description": "QR-based dine-in ordering and restaurant management platform.",
+  "start_url": "/auth",
+  "display": "standalone",
+  "background_color": "#FAF9F6",
+  "theme_color": "#F07C00",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/soras.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/soras.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["food", "business"],
+  "scope": "/"
+}

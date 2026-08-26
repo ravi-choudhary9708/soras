@@ -146,7 +146,7 @@ export default function TablesFloor() {
       {/* Settlement Drawer */}
       {selectedTable && (
         <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm flex justify-end z-50">
-          <div className="bg-white w-full max-w-md h-full p-6 flex flex-col shadow-2xl rounded-l-3xl">
+          <div className="bg-white w-full sm:max-w-md h-full p-4 sm:p-6 flex flex-col shadow-2xl sm:rounded-l-3xl">
             <div className="flex justify-between items-center border-b pb-4 mb-6">
               <div>
                 <h3 className="text-lg font-black text-slate-900">Table {selectedTable.tableNumber} — Settle Bill</h3>

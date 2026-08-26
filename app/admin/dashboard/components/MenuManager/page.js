@@ -178,7 +178,7 @@ export default function MenuManager() {
         <div className="bg-white border rounded-2xl p-6 shadow-xs">
           <h3 className="text-sm font-bold text-slate-900 mb-4">Add New Menu Item</h3>
           <form onSubmit={handleAdd} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Item Name</label>
                 <input required type="text" value={addForm.name} onChange={e => setAddForm({ ...addForm, name: e.target.value })}
@@ -251,7 +251,8 @@ export default function MenuManager() {
               <button onClick={() => setView("add")} className="mt-2 text-xs text-purple-600 font-bold hover:underline">Add your first item →</button>
             </div>
           ) : (
-            <table className="w-full text-left">
+            <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[600px]">
               <thead>
                 <tr className="bg-slate-50 border-b text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                   <th className="p-4">Item</th>
@@ -321,6 +322,7 @@ export default function MenuManager() {
                 ))}
               </tbody>
             </table>
+          </div>
           )}
         </div>
       )}

@@ -36,14 +36,14 @@ export default function LandingPage() {
 
         <div className="max-w-5xl mx-auto text-center relative z-10">
           
-          <h1 className="text-5xl md:text-[80px] font-black text-slate-900 tracking-tighter leading-[1.05] mb-8">
+          <h1 className="text-3xl sm:text-5xl md:text-[80px] font-black text-slate-900 tracking-tighter leading-[1.05] mb-6 sm:mb-8">
             The ultimate OS for <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">
               modern restaurants.
             </span>
           </h1>
           
-          <p className="text-lg md:text-2xl text-slate-500 mb-12 max-w-3xl mx-auto leading-relaxed font-medium">
+          <p className="text-base sm:text-lg md:text-2xl text-slate-500 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed font-medium">
             SORAS transforms your dine-in experience. Instant QR ordering, real-time kitchen syncing, and smart floor management — all in one place.
           </p>
           
@@ -57,7 +57,7 @@ export default function LandingPage() {
             </Link>
           </div>
           
-          <div className="mt-12 flex items-center justify-center gap-8 text-sm font-bold text-slate-400">
+          <div className="mt-8 sm:mt-12 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm font-bold text-slate-400">
             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500" /> No app required</div>
             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500" /> Setup in 10 mins</div>
             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500" /> Free 14-day trial</div>

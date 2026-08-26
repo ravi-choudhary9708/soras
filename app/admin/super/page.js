@@ -124,13 +124,13 @@ export default function SuperAdminPanel() {
     <div className="min-h-screen bg-[#0F0E1A] text-white font-sans">
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <header className="border-b border-white/10 bg-[#1A1830]/80 backdrop-blur-md sticky top-0 z-20 px-8 py-4 flex items-center justify-between">
+      <header className="border-b border-white/10 bg-[#1A1830]/80 backdrop-blur-md sticky top-0 z-20 px-4 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-lg font-black tracking-wider text-white">SORAS <span className="text-purple-400">ADMIN</span></h1>
           <p className="text-[11px] text-slate-400 mt-0.5">Platform Control Centre</p>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-xs text-slate-400 font-mono">{currentUser?.email}</span>
+          <span className="text-xs text-slate-400 font-mono hidden sm:inline">{currentUser?.email}</span>
           <button onClick={fetchPayments} className="text-slate-400 hover:text-white transition">
             <RefreshCw size={15} />
           </button>
@@ -140,10 +140,10 @@ export default function SuperAdminPanel() {
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
         {/* ── Stat Cards ───────────────────────────────────────────────── */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {[
             { label: "Pending Review", count: pending.length, color: "text-amber-400", bg: "border-amber-500/20 bg-amber-500/5" },
             { label: "Approved", count: approved.length, color: "text-emerald-400", bg: "border-emerald-500/20 bg-emerald-500/5" },
@@ -186,7 +186,7 @@ export default function SuperAdminPanel() {
 
               return (
                 <div key={payment._id} className="bg-[#1A1830] border border-white/8 rounded-2xl p-5 hover:border-white/15 transition">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
 
                     {/* Left: Info */}
                     <div className="flex-1 min-w-0">
@@ -221,7 +221,7 @@ export default function SuperAdminPanel() {
                     </div>
 
                     {/* Right: Screenshot + Actions */}
-                    <div className="flex flex-col items-end gap-3 flex-shrink-0">
+                    <div className="flex flex-row sm:flex-col items-start sm:items-end gap-3 flex-shrink-0 w-full sm:w-auto">
                       {payment.screenshotUrl && (
                         <a href={payment.screenshotUrl} target="_blank" rel="noopener noreferrer"
                           className="flex items-center gap-1 text-[11px] font-bold text-purple-400 hover:text-purple-300 transition border border-purple-500/30 px-3 py-1.5 rounded-lg bg-purple-500/5 hover:bg-purple-500/10">
