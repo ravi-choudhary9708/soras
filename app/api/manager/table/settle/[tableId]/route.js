@@ -139,7 +139,9 @@ async function settleTableHandler(req,{params}){
         // Safety Clean Fallback: If the master transaction structure failed mid-flight, 
         // we must explicitly clear the lock bit on the table so the terminal isn't permanently frozen
         try {
-            await Table.updateOne({ _id: params.id }, { $set: { isSettling: false } });
+            if (tableId) {
+                await Table.updateOne({ _id: tableId }, { $set: { isSettling: false } });
+            }
         } catch (lockReleaseErr) {
             console.error("Critical: Failed to release table settlement lock flag", lockReleaseErr);
         }

@@ -14,12 +14,12 @@ export async function GET(req, { params }) {
         const { masterQrCode } = await params;
         const now = new Date();
 
-        // Attempt to claim the table atomically — only if free/session expired
+        // Attempt to claim the table atomically — if free OR session expired
         const claimedTable = await Table.findOneAndUpdate(
             {
                 masterQrCode,
-                status: "free",
                 $or: [
+                    { status: "free" },
                     { sessionExpiresAt: { $lte: now } },
                     { sessionExpiresAt: null }
                 ]

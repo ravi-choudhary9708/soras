@@ -9,6 +9,25 @@ async function listTables(req) {
     try {
         await dbConnect();
         const { restaurantId } = req.user;
+        const now = new Date();
+
+        // Automatically release any occupied table whose session window has expired
+        await Table.updateMany(
+            {
+                restaurantId,
+                status: "occupied",
+                sessionExpiresAt: { $lt: now }
+            },
+            {
+                $set: {
+                    status: "free",
+                    sessionToken: null,
+                    sessionExpiresAt: null,
+                    isSettling: false
+                }
+            }
+        );
+
         const tables = await Table.find({ restaurantId }).sort({ tableNumber: 1 });
         return NextResponse.json(new apiResponse(200, tables, "Tables fetched successfully"), { status: 200 });
     } catch (error) {

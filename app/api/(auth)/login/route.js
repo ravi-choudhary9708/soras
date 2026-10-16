@@ -62,7 +62,6 @@ export async function POST(req){
         return response;
   } catch (error) {
     console.log("login error", error);
-    return NextResponse.json(new apiError(500, "Login processing crashed"), { status: 500 });
-    
+    return NextResponse.json(new apiError(500, error?.message || "Login processing crashed"), { status: 500 });
   }
 }

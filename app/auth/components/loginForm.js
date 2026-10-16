@@ -36,10 +36,20 @@ export default function LoginForm({ onSubmit }) {
         body: JSON.stringify({ email, password, role }),
       });
 
-      const result = await response.json();
+      let result;
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        result = await response.json();
+      } else {
+        throw new Error(
+          response.status >= 500
+            ? "Server error. Please ensure database connection and environment variables are set."
+            : `Request failed (${response.status})`
+        );
+      }
 
       if (!response.ok) {
-        throw new Error(result.message || 'Invalid login credentials.');
+        throw new Error(result?.message || 'Invalid login credentials.');
       }
 
       // 3. Render database response messages locally

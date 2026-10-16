@@ -98,10 +98,20 @@ export default function RegisterForm({ onSubmit }) {
         body: JSON.stringify(payload),
       });
 
-      const result = await response.json();
+      let result;
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        result = await response.json();
+      } else {
+        throw new Error(
+          response.status >= 500
+            ? "Server error. Please ensure database connection and environment variables are set."
+            : `Request failed (${response.status})`
+        );
+      }
 
       if (!response.ok) {
-        throw new Error(result.message || 'Registration failed. Please try again.');
+        throw new Error(result?.message || 'Registration failed. Please try again.');
       }
 
       // Display Success parameters on frontend UI dashboard
